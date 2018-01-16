@@ -94,60 +94,6 @@ Purpose     : Display controller configuration (single layer)
 
 /*********************************************************************
 *
-*       Local functions
-*
-**********************************************************************
-*/
-/********************************************************************
-*
-*       LcdWriteReg
-*
-* Function description:
-*   Sets display register
-*/
-static void LcdWriteReg(U16 Data) {
-  // ... TBD by user
-}
-
-/********************************************************************
-*
-*       LcdWriteData
-*
-* Function description:
-*   Writes a value to a display register
-*/
-static void LcdWriteData(U16 Data) {
-  // ... TBD by user
-}
-
-/********************************************************************
-*
-*       LcdWriteDataMultiple
-*
-* Function description:
-*   Writes multiple values to a display register.
-*/
-static void LcdWriteDataMultiple(U16 * pData, int NumItems) {
-  while (NumItems--) {
-    // ... TBD by user
-  }
-}
-
-/********************************************************************
-*
-*       LcdReadDataMultiple
-*
-* Function description:
-*   Reads multiple values from a display register.
-*/
-static void LcdReadDataMultiple(U16 * pData, int NumItems) {
-  while (NumItems--) {
-    // ... TBD by user
-  }
-}
-
-/*********************************************************************
-*
 *       Public functions
 *
 **********************************************************************
