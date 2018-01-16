@@ -11,7 +11,7 @@ TARGET:=emWin_eli9325_stm32f103
 DEBUG:= 1
 
 # Optimization
-OPT:= -Og
+OPT:= 
 
 #######################################
 # Paths
