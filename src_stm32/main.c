@@ -7,13 +7,10 @@
 #define CALMDOWN_COMPILER
 
 /* Private variables --------------------------------------------------------*/
-UART_HandleTypeDef huart1;
-char *hello = "koe!";
 
 /* Private function prototypes ----------------------------------------------*/
 static void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_USART1_UART_Init(void);
 
 int main(void)
 {
@@ -22,12 +19,10 @@ int main(void)
 HAL_Init();
 SystemClock_Config();
 MX_GPIO_Init();
-MX_USART1_UART_Init();
 helloWorld();
 
 /* Infinite loop-------------------------------------------------------------*/
 while (1) {
-	HAL_UART_Transmit(&huart1, (uint8_t *)hello, 5, 1000);
 	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 	HAL_Delay(1000);
 }
@@ -65,22 +60,6 @@ HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
 /*SysTick_IRQn interrupt configuration*/
 HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
-}
-
-/* USART1 init function */
-static void MX_USART1_UART_Init(void)
-{
-huart1.Instance = USART1;
-huart1.Init.BaudRate = 9600;
-huart1.Init.WordLength = UART_WORDLENGTH_8B;
-huart1.Init.StopBits = UART_STOPBITS_1;
-huart1.Init.Parity = UART_PARITY_NONE;
-huart1.Init.Mode = UART_MODE_TX;
-huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-
-if (HAL_UART_Init(&huart1) != HAL_OK)
-	_Error_Handler(__FILE__, __LINE__);
 }
 
 static void MX_GPIO_Init(void)
