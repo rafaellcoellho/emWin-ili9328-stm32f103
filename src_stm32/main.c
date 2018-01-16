@@ -2,7 +2,6 @@
 #include "main.h"
 #include "stm32f1xx_hal.h"
 #include "gpio.h"
-#include "helloWorld.h"
 
 /* Macros -------------------------------------------------------------------*/
 #define CALMDOWN_COMPILER
@@ -19,7 +18,6 @@ int main(void)
 HAL_Init();
 SystemClock_Config();
 MX_GPIO_Init();
-helloWorld();
 
 /* Infinite loop-------------------------------------------------------------*/
 while (1) {

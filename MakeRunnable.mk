@@ -34,7 +34,6 @@ PERIFLIB_PATH:=
 # C sources
 
 C_SOURCES:= \
-src/helloWorld.c \
 src_stm32/main.c \
 src_stm32/stm32f1xx_it.c \
 src_stm32/stm32f1xx_hal_msp.c \
