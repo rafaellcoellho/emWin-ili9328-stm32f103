@@ -48,9 +48,9 @@ HAL_GPIO_Init(GPIOA, &GPIO_InitStructOutput);
 static void ILI9325_Reset(void)
 {
 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET); //RESET
-HAL_Delay(3);
+HAL_Delay(300);
 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET); //RESET
-HAL_Delay(70);
+HAL_Delay(100);
 }
 
 void ILI9325_Init(void)
@@ -59,7 +59,7 @@ ILI9325_InitIO();
 ILI9325_Reset();
 }
 
-void ILI9325_WriteA0(uint8_t data)
+void ILI9325_WriteRS0(uint8_t data)
 {
 HAL_GPIO_Init(GPIOA, &GPIO_InitStructOutput);
 
@@ -82,7 +82,7 @@ HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET); // WR
 HAL_Delay(1);
 }
 
-void ILI9325_WriteA1(uint8_t data)
+void ILI9325_WriteRS1(uint8_t data)
 {
 HAL_GPIO_Init(GPIOA, &GPIO_InitStructOutput);
 
@@ -105,7 +105,7 @@ HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET); // WR
 HAL_Delay(1);
 }
 
-uint8_t ILI9325_ReadA1(void)
+uint8_t ILI9325_ReadRS1(void)
 {
 uint8_t data;
 HAL_GPIO_Init(GPIOA, &GPIO_InitStructInput);
@@ -123,6 +123,8 @@ data = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7) << 7)|
 	(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2) << 2)|
 	(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1) << 1)|
 	HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+
+HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET); // RD
 
 return data;
 }

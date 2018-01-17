@@ -5,8 +5,9 @@ extern "C" {
 #endif
 
 void ILI9325_Init(void);
-void ILI9325_WriteA0(uint8_t data);
-void ILI9325_WriteA1(uint8_t data);
+void ILI9325_WriteRS0(uint8_t data);
+void ILI9325_WriteRS1(uint8_t data);
+uint8_t ILI9325_ReadRS1(void);
 
 #ifdef __cplusplus
 }
