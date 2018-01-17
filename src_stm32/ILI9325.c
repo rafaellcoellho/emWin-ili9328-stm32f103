@@ -105,6 +105,13 @@ HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET); // WR
 HAL_Delay(1);
 }
 
+void ILI9325_MultiWriteRS1(uint8_t *p_data, int numItems)
+{
+for(int i = 0; i < numItems; i++){
+	ILI9325_WriteRS1(p_data[i]);
+}
+}
+
 uint8_t ILI9325_ReadRS1(void)
 {
 uint8_t data;
@@ -127,4 +134,11 @@ data = (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7) << 7)|
 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET); // RD
 
 return data;
+}
+
+void ILI9325_MultiReadRS1(uint8_t *p_data, int numItems)
+{
+for(int i = 0; i < numItems; i++){
+	p_data[i] = ILI9325_ReadRS1();
+}
 }
