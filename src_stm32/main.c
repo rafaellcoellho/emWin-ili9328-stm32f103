@@ -1,7 +1,7 @@
 /* Includes -----------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f1xx_hal.h"
-#include "ILI9325.h"
+#include "ILI9328.h"
 
 /* Macros -------------------------------------------------------------------*/
 #define CALMDOWN_COMPILER
@@ -26,7 +26,7 @@ GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-ILI9325_Init();
+ILI9328_Init();
 
 /* Infinite loop-------------------------------------------------------------*/
 while (1) {

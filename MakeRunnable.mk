@@ -38,7 +38,7 @@ src_stm32/main.c \
 src_stm32/stm32f1xx_it.c \
 src_stm32/stm32f1xx_hal_msp.c \
 src_stm32/system_stm32f1xx.c \
-src_stm32/ILI9325.c \
+src_stm32/ILI9328.c \
 drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c \
 drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash.c \
 drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.c \
