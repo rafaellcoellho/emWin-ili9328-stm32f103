@@ -26,12 +26,7 @@ GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-uint8_t read[] = {0x00, 0x00};
-uint16_t ad = 0x0000;
 ILI9325_Init();
-ILI9325_WriteRS0(0x00); ILI9325_WriteRS0(0x00);
-ILI9325_MultiReadRS1(read, 2);
-ad = ((uint16_t)read[0] << 8) | (uint16_t)read[1];
 
 /* Infinite loop-------------------------------------------------------------*/
 while (1) {

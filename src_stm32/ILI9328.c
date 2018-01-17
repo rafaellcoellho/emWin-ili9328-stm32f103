@@ -1,5 +1,5 @@
 #include "stm32f1xx_hal.h"
-#include "ILI9325.h"
+#include "ILI9328.h"
 
 /*
  * Anotação:
@@ -14,7 +14,7 @@
 static GPIO_InitTypeDef GPIO_InitStructOutput;
 static GPIO_InitTypeDef GPIO_InitStructInput;
 
-static void ILI9325_InitIO(void)
+static void ILI9328_InitIO(void)
 {
 GPIO_InitTypeDef GPIO_InitStruct;
 
@@ -45,7 +45,7 @@ GPIO_InitStructOutput.Speed = GPIO_SPEED_FREQ_LOW;
 HAL_GPIO_Init(GPIOA, &GPIO_InitStructOutput);
 }
 
-static void ILI9325_Reset(void)
+static void ILI9328_Reset(void)
 {
 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET); //RESET
 HAL_Delay(300);
@@ -53,13 +53,14 @@ HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET); //RESET
 HAL_Delay(100);
 }
 
-void ILI9325_Init(void)
+void ILI9328_Init(void)
 {
-ILI9325_InitIO();
-ILI9325_Reset();
+ILI9328_InitIO();
+ILI9328_Reset();
+
 }
 
-void ILI9325_WriteRS0(uint8_t data)
+void ILI9328_WriteRS0(uint8_t data)
 {
 HAL_GPIO_Init(GPIOA, &GPIO_InitStructOutput);
 
@@ -82,7 +83,7 @@ HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET); // WR
 HAL_Delay(1);
 }
 
-void ILI9325_WriteRS1(uint8_t data)
+void ILI9328_WriteRS1(uint8_t data)
 {
 HAL_GPIO_Init(GPIOA, &GPIO_InitStructOutput);
 
@@ -105,14 +106,14 @@ HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET); // WR
 HAL_Delay(1);
 }
 
-void ILI9325_MultiWriteRS1(uint8_t *p_data, int numItems)
+void ILI9328_MultiWriteRS1(uint8_t *p_data, int numItems)
 {
 for(int i = 0; i < numItems; i++){
-	ILI9325_WriteRS1(p_data[i]);
+	ILI9328_WriteRS1(p_data[i]);
 }
 }
 
-uint8_t ILI9325_ReadRS1(void)
+uint8_t ILI9328_ReadRS1(void)
 {
 uint8_t data;
 HAL_GPIO_Init(GPIOA, &GPIO_InitStructInput);
@@ -136,9 +137,9 @@ HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET); // RD
 return data;
 }
 
-void ILI9325_MultiReadRS1(uint8_t *p_data, int numItems)
+void ILI9328_MultiReadRS1(uint8_t *p_data, int numItems)
 {
 for(int i = 0; i < numItems; i++){
-	p_data[i] = ILI9325_ReadRS1();
+	p_data[i] = ILI9328_ReadRS1();
 }
 }
