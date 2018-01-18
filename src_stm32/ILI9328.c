@@ -225,59 +225,6 @@ void ILI9328_Init(void)
 	HAL_Delay(50);
 }
 
-// void ILI9328_Init(void)
-// {
-// 	ILI9328_InitIO();
-// 	ILI9328_Reset();
-//
-// 	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x07);
-// 	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-//
-// 	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x12);
-// 	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-//
-// //-----------------------------------------------------------
-//
-// 	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x11);
-// 	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-//
-// 	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x12);
-// 	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-//
-// 	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x29);
-// 	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-//
-// 	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x13);
-// 	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-//
-// 	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x12);
-// 	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-//
-// 	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x10);
-// 	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-//
-// 	HAL_Delay(100);
-//
-// 	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x10);
-// 	ILI9328_WriteRS1(0x01); ILI9328_WriteRS1(0xF0);
-//
-// 	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x12);
-// 	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x10);
-//
-// 	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x11);
-// 	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-//
-// 	HAL_Delay(100);
-//
-// 	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x10);
-// 	ILI9328_WriteRS1(0x11); ILI9328_WriteRS1(0xF0);
-//
-// 	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x07);
-// 	ILI9328_WriteRS1(0x01); ILI9328_WriteRS1(0x33);
-//
-// 	HAL_Delay(10000);
-// }
-
 void ILI9328_WriteRS0(uint8_t data)
 {
 	HAL_GPIO_Init(GPIOA, &GPIO_InitStructOutput);
