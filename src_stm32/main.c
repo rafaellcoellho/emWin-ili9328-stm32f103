@@ -28,13 +28,13 @@ int main(void)
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-	ILI9328_Init();
-	ILI9328_Test();
+	// ILI9328_Init();
+	// ILI9328_Test();
 
-	// __HAL_RCC_CRC_CLK_ENABLE();
-	// GUI_Init();
-	// HAL_Delay(1000);
-	// GUI_DispStringAt("Hello world!", 100, 100);
+	__HAL_RCC_CRC_CLK_ENABLE();
+	GUI_Init();
+	HAL_Delay(1000);
+	GUI_DispStringAt("Hello world!", 100, 100);
 
 
 /* Infinite loop-------------------------------------------------------------*/
