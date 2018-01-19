@@ -1,6 +1,6 @@
-# Hello World with emWin display using ILI9325 controller and STM32f103C8
+# Hello World with emWin display using ILI9328 controller and STM32f103C8
 
-An example project to start developing with the graphic library provided by 
+An example project to start developing with the graphic library provided by
 STM32F1Cube, SEGGER emWin. Using 2.4 "TFT LCD SHiELD with ILI9325 Controller.
 
 ## Prerequisites
@@ -8,7 +8,7 @@ STM32F1Cube, SEGGER emWin. Using 2.4 "TFT LCD SHiELD with ILI9325 Controller.
 First you need to clone this repository on your machine.
 
 ```
-$ git clone https://github.com/rafaellcoellho/emWin-ili9325-stm32f103.git
+$ git clone https://github.com/rafaellcoellho/emWin-ili9328-stm32f103.git
 ```
 
 To analyze the code according to the linux kernel code style, the perl
