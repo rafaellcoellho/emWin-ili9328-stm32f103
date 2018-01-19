@@ -21,6 +21,7 @@ void ILI9328_WriteRS1(uint8_t data);
 void ILI9328_MultiWriteRS1(uint8_t *p_data, int numItems);
 uint8_t ILI9328_ReadRS1(void);
 void ILI9328_MultiReadRS1(uint8_t *p_data, int numItems);
+void ILI9328_Test();
 
 #ifdef __cplusplus
 }

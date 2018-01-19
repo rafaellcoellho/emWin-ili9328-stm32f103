@@ -28,36 +28,7 @@ int main(void)
 	HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
 	ILI9328_Init();
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x50);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x64);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x51);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x96);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x52);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x64);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x53);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x96);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x20);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x64);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x21);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x64);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x021);
-	uint8_t read1 = ILI9328_ReadRS1();
-	uint8_t read2 = ILI9328_ReadRS1();
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x22);
-
-	for(int i = 0; i < 2500; i++){
-		ILI9328_WriteRS1(0x10); ILI9328_WriteRS1(0x51);
-	}
-
-
+	ILI9328_Test();
 
 /* Infinite loop-------------------------------------------------------------*/
 	while (1) {
