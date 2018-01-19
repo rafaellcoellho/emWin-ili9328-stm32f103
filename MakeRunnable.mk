@@ -55,7 +55,7 @@ drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c \
 drivers/STemWin/Config/GUIConf.c \
 drivers/STemWin/Config/LCDConf.c \
 drivers/STemWin/Config/ILI9328.c \
-drivers/STemWin/Config/GUI_X.c 
+drivers/STemWin/Config/GUI_X.c
 
 # ASM sources
 ASM_SOURCES =  \
@@ -147,7 +147,7 @@ LDSCRIPT = STM32F103C8Tx_FLASH.ld
 # libraries
 LIBS = -lc -lm -lnosys
 LIBDIR =
-STMWINLIB = $(STEMWINLIBPATH)/libSTemWin532_CM3_GCC.a
+STMWINLIB = $(STEMWINLIBPATH)/STemWin532_CM3_GCC.a
 LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) \
 -Wl,-Map=build/$(TARGET).map,--cref -Wl,--gc-sections
 
