@@ -47,9 +47,9 @@ int main(void)
 	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x21);
 	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x64);
 
-	// ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x01);
-	// uint8_t read1 = ILI9328_ReadRS1();
-	// uint8_t read2 = ILI9328_ReadRS1();
+	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x021);
+	uint8_t read1 = ILI9328_ReadRS1();
+	uint8_t read2 = ILI9328_ReadRS1();
 
 	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x22);
 
