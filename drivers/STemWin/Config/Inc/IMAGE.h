@@ -27,9 +27,9 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : LCDConf_FlexColor_Template.c
-Purpose     : Display controller configuration (single layer)
----------------------------END-OF-HEADER------------------------------
+File        : IMAGE.h
+Purpose     : Image include
+--------------------END-OF-HEADER-------------------------------------
 */
 
 /**
@@ -42,56 +42,47 @@ Purpose     : Display controller configuration (single layer)
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
   */
+  
+#ifndef IMAGE_H
+#define IMAGE_H
 
-#include "GUI.h"
-#include "GUIDRV_FlexColor.h"
-#include "ILI9328.h"
+#include "WM.h"
+#include "DIALOG_Intern.h"
+#include "WIDGET.h"
 
-/*********************************************************************
-*
-*       Layer configuration (to be modified)
-*
-**********************************************************************
-*/
+#if GUI_WINSUPPORT
 
-//
-// Physical display size
-//
-#define XSIZE_PHYS  240 // To be adapted to x-screen size
-#define YSIZE_PHYS  320 // To be adapted to y-screen size
+#if defined(__cplusplus)
+  extern "C" { // Make sure we have C-declarations in C++ programs
+#endif
 
 /*********************************************************************
 *
-*       Configuration checking
+*       Defines
 *
 **********************************************************************
 */
-#ifndef   VXSIZE_PHYS
-  #define VXSIZE_PHYS XSIZE_PHYS
-#endif
-#ifndef   VYSIZE_PHYS
-  #define VYSIZE_PHYS YSIZE_PHYS
-#endif
-#ifndef   XSIZE_PHYS
-  #error Physical X size of display is not defined!
-#endif
-#ifndef   YSIZE_PHYS
-  #error Physical Y size of display is not defined!
-#endif
-#ifndef   GUICC_565
-  #error Color conversion not defined!
-#endif
-#ifndef   GUIDRV_FLEXCOLOR
-  #error No display driver defined!
-#endif
+#define IMAGE_CF_MEMDEV   (1 << 0) // Widget uses an internal memory device which speeds up use of compressed images (GIF, JPEG, PNG)
+#define IMAGE_CF_TILE     (1 << 1) // Uses tiling to fill up the whole area of the widget
+#define IMAGE_CF_ALPHA    (1 << 2) // Needs to be set if alpha blending is required (PNG)
+#define IMAGE_CF_ATTACHED (1 << 3) // Widget size is fixed to the parent border
+#define IMAGE_CF_AUTOSIZE (1 << 4) // Widget size is taken from the attached image
+
+/*********************************************************************
+*
+*       Types
+*
+**********************************************************************
+*/
+typedef WM_HMEM IMAGE_Handle;
 
 /*********************************************************************
 *
@@ -99,74 +90,38 @@ Purpose     : Display controller configuration (single layer)
 *
 **********************************************************************
 */
-/*********************************************************************
-*
-*       LCD_X_Config
-*
-* Function description:
-*   Called during the initialization process in order to set up the
-*   display driver configuration.
-*
-*/
-void LCD_X_Config(void) {
-  GUI_DEVICE *pDevice;
-  CONFIG_FLEXCOLOR Config = {0};
-  GUI_PORT_API PortAPI = {0};
-  //
-  // Set display driver and color conversion
-  //
-  pDevice = GUI_DEVICE_CreateAndLink(GUIDRV_FLEXCOLOR, GUICC_565, 0, 0);
-  //
-  // Orientation
-  //
-  Config.Orientation = GUI_SWAP_XY | GUI_MIRROR_Y;
-  GUIDRV_FlexColor_Config(pDevice, &Config);
-  //
-  // Set controller and operation mode
-  //
-  PortAPI.pfWrite8_A0  = ILI9328_WriteRS0;
-  PortAPI.pfWrite8_A1  = ILI9328_WriteRS1;
-  PortAPI.pfWriteM8_A1 = ILI9328_MultiWriteRS1;
-  PortAPI.pfRead8_A1  = ILI9328_ReadRS1;
-  PortAPI.pfReadM8_A1 = ILI9328_MultiReadRS1;
-  GUIDRV_FlexColor_SetFunc(pDevice, &PortAPI, GUIDRV_FLEXCOLOR_F66708, GUIDRV_FLEXCOLOR_M16C0B8);
-}
+IMAGE_Handle IMAGE_CreateEx      (int x0, int y0, int xSize, int ySize, WM_HWIN hParent, int WinFlags, int ExFlags, int Id);
+IMAGE_Handle IMAGE_CreateUser    (int x0, int y0, int xSize, int ySize, WM_HWIN hParent, int WinFlags, int ExFlags, int Id, int NumExtraBytes);
+IMAGE_Handle IMAGE_CreateIndirect(const GUI_WIDGET_CREATE_INFO * pCreateInfo, WM_HWIN hWinParent, int x0, int y0, WM_CALLBACK * cb);
+
+void IMAGE_Callback(WM_MESSAGE * pMsg);
 
 /*********************************************************************
 *
-*       LCD_X_DisplayDriver
+*       Member functions
 *
-* Function description:
-*   This function is called by the display driver for several purposes.
-*   To support the according task the routine needs to be adapted to
-*   the display controller. Please note that the commands marked with
-*   'optional' are not cogently required and should only be adapted if
-*   the display controller supports these features.
-*
-* Parameter:
-*   LayerIndex - Index of layer to be configured
-*   Cmd        - Please refer to the details in the switch statement below
-*   pData      - Pointer to a LCD_X_DATA structure
-*
-* Return Value:
-*   < -1 - Error
-*     -1 - Command not handled
-*      0 - Ok
+**********************************************************************
 */
-int LCD_X_DisplayDriver(unsigned LayerIndex, unsigned Cmd, void * pData) {
-  int r;
-  (void) LayerIndex;
-  (void) pData;
+int  IMAGE_GetUserData(IMAGE_Handle hObj, void * pDest, int NumBytes);
+void IMAGE_SetBitmap  (IMAGE_Handle hWin, const GUI_BITMAP * pBitmap);
+void IMAGE_SetBMP     (IMAGE_Handle hObj, const void * pData, U32 FileSize);
+void IMAGE_SetBMPEx   (IMAGE_Handle hObj, GUI_GET_DATA_FUNC * pfGetData, void * pVoid);
+void IMAGE_SetDTA     (IMAGE_Handle hObj, const void * pData, U32 FileSize);
+void IMAGE_SetDTAEx   (IMAGE_Handle hObj, GUI_GET_DATA_FUNC * pfGetData, void * pVoid);
+void IMAGE_SetGIF     (IMAGE_Handle hObj, const void * pData, U32 FileSize);
+void IMAGE_SetGIFEx   (IMAGE_Handle hObj, GUI_GET_DATA_FUNC * pfGetData, void * pVoid);
+void IMAGE_SetJPEG    (IMAGE_Handle hObj, const void * pData, U32 FileSize);
+void IMAGE_SetJPEGEx  (IMAGE_Handle hObj, GUI_GET_DATA_FUNC * pfGetData, void * pVoid);
+void IMAGE_SetPNG     (IMAGE_Handle hObj, const void * pData, U32 FileSize);
+void IMAGE_SetPNGEx   (IMAGE_Handle hObj, GUI_GET_DATA_FUNC * pfGetData, void * pVoid);
+int  IMAGE_SetUserData(IMAGE_Handle hObj, const void * pSrc, int NumBytes);
 
-  switch (Cmd) {
-  case LCD_X_INITCONTROLLER: {
-    ILI9328_Init();
-    return 0;
+
+#if defined(__cplusplus)
   }
-  default:
-    r = -1;
-  }
-  return r;
-}
+#endif
+
+#endif // GUI_WINSUPPORT
+#endif // IMAGE_H
 
 /*************************** End of file ****************************/

@@ -1,6 +1,7 @@
 /* Includes -----------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f1xx_hal.h"
+#include "GUI.h"
 #include "ILI9328.h"
 
 /* Macros -------------------------------------------------------------------*/
@@ -29,6 +30,12 @@ int main(void)
 
 	ILI9328_Init();
 	ILI9328_Test();
+
+	// __HAL_RCC_CRC_CLK_ENABLE();
+	// GUI_Init();
+	// HAL_Delay(1000);
+	// GUI_DispStringAt("Hello world!", 100, 100);
+
 
 /* Infinite loop-------------------------------------------------------------*/
 	while (1) {

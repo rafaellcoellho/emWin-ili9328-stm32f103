@@ -27,9 +27,9 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : LCDConf_FlexColor_Template.c
-Purpose     : Display controller configuration (single layer)
----------------------------END-OF-HEADER------------------------------
+File        : LISTWHEEL_Private.h
+Purpose     : Private LISTWHEEL include
+--------------------END-OF-HEADER-------------------------------------
 */
 
 /**
@@ -42,131 +42,111 @@ Purpose     : Display controller configuration (single layer)
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
   */
+  
+#ifndef LISTWHEEL_PRIVATE_H
+#define LISTWHEEL_PRIVATE_H
 
-#include "GUI.h"
-#include "GUIDRV_FlexColor.h"
-#include "ILI9328.h"
+#include "LISTWHEEL.h"
+#include "WM.h"
+#include "GUI_ARRAY.h"
+#include "WIDGET.h"
+
+#if GUI_WINSUPPORT
 
 /*********************************************************************
 *
-*       Layer configuration (to be modified)
+*       Defines
+*
+**********************************************************************
+*/
+#define LISTWHEEL_STATE_PRESSED WIDGET_STATE_USER0
+
+/*********************************************************************
+*
+*       Object definition
 *
 **********************************************************************
 */
 
-//
-// Physical display size
-//
-#define XSIZE_PHYS  240 // To be adapted to x-screen size
-#define YSIZE_PHYS  320 // To be adapted to y-screen size
+typedef struct {
+  void * pData;
+  char   acText[1];
+} LISTWHEEL_ITEM;
+
+typedef struct {
+  const GUI_FONT * pFont;
+  GUI_COLOR        aBackColor[2];
+  GUI_COLOR        aTextColor[2];
+  I16              Align;
+  unsigned         Deceleration;
+} LISTWHEEL_PROPS;
+
+typedef struct {
+  WIDGET                  Widget;
+  GUI_ARRAY               ItemArray;
+  WIDGET_DRAW_ITEM_FUNC * pfOwnerDraw;
+  LISTWHEEL_PROPS         Props;
+  WM_HMEM                 hTimer;
+  unsigned                LBorder;
+  unsigned                RBorder;
+  unsigned                LineHeight;
+  int                     Sel;
+  GUI_TIMER_TIME          TimeTouched;      // Time stamp of last touch event
+  GUI_TIMER_TIME          TimeTouchedLast;  // Time of the last touch
+  int                     PosTouchedLast;   // Last touched position in pixels
+  int                     Pos;              // Current position in pixels
+  int                     Velocity;         // Motion in pixels
+  int                     SnapPosition;     // Snap position in pixels
+  int                     TouchPos;         // Y-position of last touch event
+  int                     ySizeData;        // Data size in pixels
+  int                     Destination;      // Destination position in pixels
+  GUI_TIMER_TIME          TimerPeriod;      // Period of timer events
+} LISTWHEEL_OBJ;
 
 /*********************************************************************
 *
-*       Configuration checking
+*       Macros for internal use
 *
 **********************************************************************
 */
-#ifndef   VXSIZE_PHYS
-  #define VXSIZE_PHYS XSIZE_PHYS
+#if GUI_DEBUG_LEVEL >= GUI_DEBUG_LEVEL_CHECK_ALL
+  #define LISTWHEEL_INIT_ID(p)  (p->Widget.DebugId = LISTWHEEL_ID)
+#else
+  #define LISTWHEEL_INIT_ID(p)
 #endif
-#ifndef   VYSIZE_PHYS
-  #define VYSIZE_PHYS YSIZE_PHYS
-#endif
-#ifndef   XSIZE_PHYS
-  #error Physical X size of display is not defined!
-#endif
-#ifndef   YSIZE_PHYS
-  #error Physical Y size of display is not defined!
-#endif
-#ifndef   GUICC_565
-  #error Color conversion not defined!
-#endif
-#ifndef   GUIDRV_FLEXCOLOR
-  #error No display driver defined!
+
+#if GUI_DEBUG_LEVEL >= GUI_DEBUG_LEVEL_CHECK_ALL
+  LISTWHEEL_OBJ * LISTWHEEL_LockH(LISTWHEEL_Handle h);
+  #define LISTWHEEL_LOCK_H(h)   LISTWHEEL_LockH(h)
+#else
+  #define LISTWHEEL_LOCK_H(h)   (LISTWHEEL_OBJ *)GUI_LOCK_H(h)
 #endif
 
 /*********************************************************************
 *
-*       Public functions
+*       Private (module internal) data
 *
 **********************************************************************
 */
-/*********************************************************************
-*
-*       LCD_X_Config
-*
-* Function description:
-*   Called during the initialization process in order to set up the
-*   display driver configuration.
-*
-*/
-void LCD_X_Config(void) {
-  GUI_DEVICE *pDevice;
-  CONFIG_FLEXCOLOR Config = {0};
-  GUI_PORT_API PortAPI = {0};
-  //
-  // Set display driver and color conversion
-  //
-  pDevice = GUI_DEVICE_CreateAndLink(GUIDRV_FLEXCOLOR, GUICC_565, 0, 0);
-  //
-  // Orientation
-  //
-  Config.Orientation = GUI_SWAP_XY | GUI_MIRROR_Y;
-  GUIDRV_FlexColor_Config(pDevice, &Config);
-  //
-  // Set controller and operation mode
-  //
-  PortAPI.pfWrite8_A0  = ILI9328_WriteRS0;
-  PortAPI.pfWrite8_A1  = ILI9328_WriteRS1;
-  PortAPI.pfWriteM8_A1 = ILI9328_MultiWriteRS1;
-  PortAPI.pfRead8_A1  = ILI9328_ReadRS1;
-  PortAPI.pfReadM8_A1 = ILI9328_MultiReadRS1;
-  GUIDRV_FlexColor_SetFunc(pDevice, &PortAPI, GUIDRV_FLEXCOLOR_F66708, GUIDRV_FLEXCOLOR_M16C0B8);
-}
+extern LISTWHEEL_PROPS LISTWHEEL_DefaultProps;
 
 /*********************************************************************
 *
-*       LCD_X_DisplayDriver
+*       Private (module internal) functions
 *
-* Function description:
-*   This function is called by the display driver for several purposes.
-*   To support the according task the routine needs to be adapted to
-*   the display controller. Please note that the commands marked with
-*   'optional' are not cogently required and should only be adapted if
-*   the display controller supports these features.
-*
-* Parameter:
-*   LayerIndex - Index of layer to be configured
-*   Cmd        - Please refer to the details in the switch statement below
-*   pData      - Pointer to a LCD_X_DATA structure
-*
-* Return Value:
-*   < -1 - Error
-*     -1 - Command not handled
-*      0 - Ok
+**********************************************************************
 */
-int LCD_X_DisplayDriver(unsigned LayerIndex, unsigned Cmd, void * pData) {
-  int r;
-  (void) LayerIndex;
-  (void) pData;
+const char * LISTWHEEL__GetpStringLocked(LISTWHEEL_Handle hObj, int Index, LISTWHEEL_ITEM ** ppItem);
 
-  switch (Cmd) {
-  case LCD_X_INITCONTROLLER: {
-    ILI9328_Init();
-    return 0;
-  }
-  default:
-    r = -1;
-  }
-  return r;
-}
+#endif // GUI_WINSUPPORT
+#endif // LISTWHEEL_PRIVATE_H
 
 /*************************** End of file ****************************/

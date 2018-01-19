@@ -27,8 +27,8 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : LCDConf_FlexColor_Template.c
-Purpose     : Display controller configuration (single layer)
+File        : EDIT_Private.h
+Purpose     : Internal header file
 ---------------------------END-OF-HEADER------------------------------
 */
 
@@ -42,131 +42,111 @@ Purpose     : Display controller configuration (single layer)
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
   */
+  
+#ifndef EDIT_PRIVATE_H
+#define EDIT_PRIVATE_H
 
-#include "GUI.h"
-#include "GUIDRV_FlexColor.h"
-#include "ILI9328.h"
+#include "EDIT.h"
+
+#if GUI_WINSUPPORT
+
+#include "WIDGET.h"
 
 /*********************************************************************
 *
-*       Layer configuration (to be modified)
+*       Defines
 *
 **********************************************************************
 */
+#define EDIT_REALLOC_SIZE  16
 
-//
-// Physical display size
-//
-#define XSIZE_PHYS  240 // To be adapted to x-screen size
-#define YSIZE_PHYS  320 // To be adapted to y-screen size
+#ifndef EDIT_XOFF
+  #define EDIT_XOFF        1
+#endif
 
 /*********************************************************************
 *
-*       Configuration checking
+*       Types
 *
 **********************************************************************
 */
-#ifndef   VXSIZE_PHYS
-  #define VXSIZE_PHYS XSIZE_PHYS
-#endif
-#ifndef   VYSIZE_PHYS
-  #define VYSIZE_PHYS YSIZE_PHYS
-#endif
-#ifndef   XSIZE_PHYS
-  #error Physical X size of display is not defined!
-#endif
-#ifndef   YSIZE_PHYS
-  #error Physical Y size of display is not defined!
-#endif
-#ifndef   GUICC_565
-  #error Color conversion not defined!
-#endif
-#ifndef   GUIDRV_FLEXCOLOR
-  #error No display driver defined!
-#endif
+typedef struct EDIT_Obj_struct EDIT_Obj;
+
+typedef struct {
+  int              Align;
+  int              Border;
+  const GUI_FONT * pFont;
+  GUI_COLOR        aTextColor[3];
+  GUI_COLOR        aBkColor[3];
+} EDIT_PROPS;
+
+struct EDIT_Obj_struct {
+  WIDGET               Widget;
+  WM_HMEM              hpText;
+  I16                  MaxLen;
+  U16                  BufferSize;
+  I32                  Min, Max;        // Min max values as normalized floats (integers)
+  U8                   NumDecs;         // Number of decimals
+  I32                  CurrentValue;    // Current value
+  int                  CursorPos;       // Cursor position. 0 means left most
+  unsigned             SelSize;         // Number of selected characters
+  U8                   EditMode;        // Insert or overwrite mode
+  U8                   XSizeCursor;     // Size of cursor when working in insert mode
+  U8                   Flags;
+  tEDIT_AddKeyEx     * pfAddKeyEx;      // Handle key input
+  tEDIT_UpdateBuffer * pfUpdateBuffer;  // Update textbuffer
+  EDIT_PROPS           Props;
+  WM_HTIMER            hTimer;
+  U8                   MinMaxMode;
+};
 
 /*********************************************************************
 *
-*       Public functions
+*       Macros for internal use
 *
 **********************************************************************
 */
-/*********************************************************************
-*
-*       LCD_X_Config
-*
-* Function description:
-*   Called during the initialization process in order to set up the
-*   display driver configuration.
-*
-*/
-void LCD_X_Config(void) {
-  GUI_DEVICE *pDevice;
-  CONFIG_FLEXCOLOR Config = {0};
-  GUI_PORT_API PortAPI = {0};
-  //
-  // Set display driver and color conversion
-  //
-  pDevice = GUI_DEVICE_CreateAndLink(GUIDRV_FLEXCOLOR, GUICC_565, 0, 0);
-  //
-  // Orientation
-  //
-  Config.Orientation = GUI_SWAP_XY | GUI_MIRROR_Y;
-  GUIDRV_FlexColor_Config(pDevice, &Config);
-  //
-  // Set controller and operation mode
-  //
-  PortAPI.pfWrite8_A0  = ILI9328_WriteRS0;
-  PortAPI.pfWrite8_A1  = ILI9328_WriteRS1;
-  PortAPI.pfWriteM8_A1 = ILI9328_MultiWriteRS1;
-  PortAPI.pfRead8_A1  = ILI9328_ReadRS1;
-  PortAPI.pfReadM8_A1 = ILI9328_MultiReadRS1;
-  GUIDRV_FlexColor_SetFunc(pDevice, &PortAPI, GUIDRV_FLEXCOLOR_F66708, GUIDRV_FLEXCOLOR_M16C0B8);
-}
+#if GUI_DEBUG_LEVEL >= GUI_DEBUG_LEVEL_CHECK_ALL
+  #define EDIT_INIT_ID(p) (p->Widget.DebugId = EDIT_ID)
+#else
+  #define EDIT_INIT_ID(p)
+#endif
+
+#if GUI_DEBUG_LEVEL >= GUI_DEBUG_LEVEL_CHECK_ALL
+  EDIT_Obj * EDIT_LockH(EDIT_Handle h);
+  #define EDIT_LOCK_H(h)   EDIT_LockH(h)
+#else
+  #define EDIT_LOCK_H(h)   (EDIT_Obj *)GUI_LOCK_H(h)
+#endif
 
 /*********************************************************************
 *
-*       LCD_X_DisplayDriver
+*       Public data (internal defaults)
 *
-* Function description:
-*   This function is called by the display driver for several purposes.
-*   To support the according task the routine needs to be adapted to
-*   the display controller. Please note that the commands marked with
-*   'optional' are not cogently required and should only be adapted if
-*   the display controller supports these features.
-*
-* Parameter:
-*   LayerIndex - Index of layer to be configured
-*   Cmd        - Please refer to the details in the switch statement below
-*   pData      - Pointer to a LCD_X_DATA structure
-*
-* Return Value:
-*   < -1 - Error
-*     -1 - Command not handled
-*      0 - Ok
+**********************************************************************
 */
-int LCD_X_DisplayDriver(unsigned LayerIndex, unsigned Cmd, void * pData) {
-  int r;
-  (void) LayerIndex;
-  (void) pData;
+extern EDIT_PROPS EDIT__DefaultProps;
 
-  switch (Cmd) {
-  case LCD_X_INITCONTROLLER: {
-    ILI9328_Init();
-    return 0;
-  }
-  default:
-    r = -1;
-  }
-  return r;
-}
+/*********************************************************************
+*
+*       Public functions (internal)
+*
+**********************************************************************
+*/
+U16  EDIT__GetCurrentChar  (EDIT_Obj * pObj);
+void EDIT__SetCursorPos    (EDIT_Handle hObj, int CursorPos);
+void EDIT__SetValueUnsigned(EDIT_Handle hObj, I32 Value);
+
+#endif // GUI_WINSUPPORT
+
+#endif // EDIT_PRIVATE_H
 
 /*************************** End of file ****************************/

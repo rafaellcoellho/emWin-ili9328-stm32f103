@@ -27,9 +27,9 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : GUIConf.h
-Purpose     : Configures emWins abilities, fonts etc.
-----------------------------------------------------------------------
+File        : KNOB.h
+Purpose     : KNOB include
+--------------------END-OF-HEADER-------------------------------------
 */
 
 /**
@@ -42,55 +42,79 @@ Purpose     : Configures emWins abilities, fonts etc.
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
   */
+  
+#ifndef KNOB_PRIVATE_H
+#define KNOB_PRIVATE_H
 
-#ifndef GUICONF_H
-#define GUICONF_H
+#include "KNOB.h"
+#include "GUI_Private.h"
+
+#if (GUI_SUPPORT_MEMDEV && GUI_WINSUPPORT)
 
 /*********************************************************************
 *
-*       Multi layer/display support
+*       Object definition
+*
+**********************************************************************
 */
-#define GUI_NUM_LAYERS            1    // Maximum number of available layers
+typedef struct {
+  I32 Snap;          // Position where the knob snaps
+  I32 Period;        // Time it takes to stop the knob in ms
+  GUI_COLOR BkColor; // The Bk color
+  I32 Offset;        // the offset
+  I32 MinRange;
+  I32 MaxRange;
+  I32 TickSize;      // Minimum movement range in 1/10 of degree
+  I32 KeyValue;      // Range of movement for one key push
+} KNOB_PROPS;
+
+typedef struct {
+  WIDGET Widget;
+  KNOB_PROPS Props;
+  WM_HMEM hContext;
+  I32 Angle;
+  I32 Value;
+  int xSize;
+  int ySize;
+  GUI_MEMDEV_Handle hMemSrc;
+  GUI_MEMDEV_Handle hMemDst;
+  GUI_MEMDEV_Handle hMemBk;
+} KNOB_OBJ;
 
 /*********************************************************************
 *
-*       Multi tasking support
+*       Macros for internal use
+*
+**********************************************************************
 */
-#ifdef OS_SUPPORT
- #define GUI_OS                    (1)  // Compile with multitasking support
+#if GUI_DEBUG_LEVEL >= GUI_DEBUG_LEVEL_CHECK_ALL
+  #define KNOB_INIT_ID(p) p->Widget.DebugId = KNOB_ID
 #else
- #define GUI_OS                    (0)
+  #define KNOB_INIT_ID(p)
+#endif
+
+#if GUI_DEBUG_LEVEL >= GUI_DEBUG_LEVEL_CHECK_ALL
+  KNOB_OBJ * KNOB_LockH(KNOB_Handle h);
+  #define KNOB_LOCK_H(h)   KNOB_LockH(h)
+#else
+  #define KNOB_LOCK_H(h)   (KNOB_OBJ *)GUI_LOCK_H(h)
 #endif
 
 /*********************************************************************
 *
-*       Configuration of touch support
-*/
-#ifndef   GUI_SUPPORT_TOUCH
-  #define GUI_SUPPORT_TOUCH       (1)  // Support touchscreen
-#endif
-
-/*********************************************************************
+*       Module internal data
 *
-*       Default font
+**********************************************************************
 */
-#define GUI_DEFAULT_FONT          &GUI_Font6x8
+extern KNOB_PROPS KNOB__DefaultProps;
 
-/*********************************************************************
-*
-*         Configuration of available packages
-*/
-#define GUI_SUPPORT_MOUSE             (0)    /* Support a mouse */
-#define GUI_WINSUPPORT                (0)    /* Use window manager */
-#define GUI_SUPPORT_MEMDEV            (1)    /* Memory device package available */
-#define GUI_SUPPORT_DEVICES           (1)    /* Enable use of device pointers */
-
-#endif  /* Avoid multiple inclusion */
+#endif   // (GUI_SUPPORT_MEMDEV && GUI_WINSUPPORT)
+#endif   // KNOB_PRIVATE_H

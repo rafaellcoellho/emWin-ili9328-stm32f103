@@ -27,8 +27,8 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : LCDConf_FlexColor_Template.c
-Purpose     : Display controller configuration (single layer)
+File        : GUI_X.C
+Purpose     : Config / System dependent externals for GUI
 ---------------------------END-OF-HEADER------------------------------
 */
 
@@ -52,121 +52,72 @@ Purpose     : Display controller configuration (single layer)
   */
 
 #include "GUI.h"
-#include "GUIDRV_FlexColor.h"
-#include "ILI9328.h"
 
 /*********************************************************************
 *
-*       Layer configuration (to be modified)
-*
-**********************************************************************
+*       Global data
 */
-
-//
-// Physical display size
-//
-#define XSIZE_PHYS  240 // To be adapted to x-screen size
-#define YSIZE_PHYS  320 // To be adapted to y-screen size
+volatile GUI_TIMER_TIME OS_TimeMS;
 
 /*********************************************************************
 *
-*       Configuration checking
-*
-**********************************************************************
-*/
-#ifndef   VXSIZE_PHYS
-  #define VXSIZE_PHYS XSIZE_PHYS
-#endif
-#ifndef   VYSIZE_PHYS
-  #define VYSIZE_PHYS YSIZE_PHYS
-#endif
-#ifndef   XSIZE_PHYS
-  #error Physical X size of display is not defined!
-#endif
-#ifndef   YSIZE_PHYS
-  #error Physical Y size of display is not defined!
-#endif
-#ifndef   GUICC_565
-  #error Color conversion not defined!
-#endif
-#ifndef   GUIDRV_FLEXCOLOR
-  #error No display driver defined!
-#endif
+*      Timing:
+*                 GUI_X_GetTime()
+*                 GUI_X_Delay(int)
 
-/*********************************************************************
-*
-*       Public functions
-*
-**********************************************************************
+  Some timing dependent routines require a GetTime
+  and delay function. Default time unit (tick), normally is
+  1 ms.
 */
-/*********************************************************************
-*
-*       LCD_X_Config
-*
-* Function description:
-*   Called during the initialization process in order to set up the
-*   display driver configuration.
-*
-*/
-void LCD_X_Config(void) {
-  GUI_DEVICE *pDevice;
-  CONFIG_FLEXCOLOR Config = {0};
-  GUI_PORT_API PortAPI = {0};
-  //
-  // Set display driver and color conversion
-  //
-  pDevice = GUI_DEVICE_CreateAndLink(GUIDRV_FLEXCOLOR, GUICC_565, 0, 0);
-  //
-  // Orientation
-  //
-  Config.Orientation = GUI_SWAP_XY | GUI_MIRROR_Y;
-  GUIDRV_FlexColor_Config(pDevice, &Config);
-  //
-  // Set controller and operation mode
-  //
-  PortAPI.pfWrite8_A0  = ILI9328_WriteRS0;
-  PortAPI.pfWrite8_A1  = ILI9328_WriteRS1;
-  PortAPI.pfWriteM8_A1 = ILI9328_MultiWriteRS1;
-  PortAPI.pfRead8_A1  = ILI9328_ReadRS1;
-  PortAPI.pfReadM8_A1 = ILI9328_MultiReadRS1;
-  GUIDRV_FlexColor_SetFunc(pDevice, &PortAPI, GUIDRV_FLEXCOLOR_F66708, GUIDRV_FLEXCOLOR_M16C0B8);
+
+GUI_TIMER_TIME GUI_X_GetTime(void) {
+  return OS_TimeMS;
+}
+
+void GUI_X_Delay(int ms) {
+  int tEnd = OS_TimeMS + ms;
+  while ((tEnd - OS_TimeMS) > 0);
 }
 
 /*********************************************************************
 *
-*       LCD_X_DisplayDriver
+*       GUI_X_Init()
 *
-* Function description:
-*   This function is called by the display driver for several purposes.
-*   To support the according task the routine needs to be adapted to
-*   the display controller. Please note that the commands marked with
-*   'optional' are not cogently required and should only be adapted if
-*   the display controller supports these features.
-*
-* Parameter:
-*   LayerIndex - Index of layer to be configured
-*   Cmd        - Please refer to the details in the switch statement below
-*   pData      - Pointer to a LCD_X_DATA structure
-*
-* Return Value:
-*   < -1 - Error
-*     -1 - Command not handled
-*      0 - Ok
+* Note:
+*     GUI_X_Init() is called from GUI_Init is a possibility to init
+*     some hardware which needs to be up and running before the GUI.
+*     If not required, leave this routine blank.
 */
-int LCD_X_DisplayDriver(unsigned LayerIndex, unsigned Cmd, void * pData) {
-  int r;
-  (void) LayerIndex;
-  (void) pData;
 
-  switch (Cmd) {
-  case LCD_X_INITCONTROLLER: {
-    ILI9328_Init();
-    return 0;
-  }
-  default:
-    r = -1;
-  }
-  return r;
-}
+void GUI_X_Init(void) {}
+
+
+/*********************************************************************
+*
+*       GUI_X_ExecIdle
+*
+* Note:
+*  Called if WM is in idle state
+*/
+
+void GUI_X_ExecIdle(void) {}
+
+/*********************************************************************
+*
+*      Logging: OS dependent
+
+Note:
+  Logging is used in higher debug levels only. The typical target
+  build does not use logging and does therefor not require any of
+  the logging routines below. For a release build without logging
+  the routines below may be eliminated to save some space.
+  (If the linker is not function aware and eliminates unreferenced
+  functions automatically)
+
+*/
+
+void GUI_X_Log     (const char *s) { GUI_USE_PARA(s); }
+void GUI_X_Warn    (const char *s) { GUI_USE_PARA(s); }
+void GUI_X_ErrorOut(const char *s) { GUI_USE_PARA(s); }
 
 /*************************** End of file ****************************/

@@ -17,6 +17,9 @@ OPT:=
 # Paths
 #######################################
 
+#
+STEMWINLIBPATH= drivers/STemWin
+
 # Source path
 SOURCES_DIR:=  \
 src \
@@ -38,7 +41,6 @@ src_stm32/main.c \
 src_stm32/stm32f1xx_it.c \
 src_stm32/stm32f1xx_hal_msp.c \
 src_stm32/system_stm32f1xx.c \
-src_stm32/ILI9328.c \
 drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c \
 drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash.c \
 drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.c \
@@ -49,7 +51,11 @@ drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.c \
 drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.c \
 drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.c \
 drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.c \
-drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c
+drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c \
+drivers/STemWin/Config/GUIConf.c \
+drivers/STemWin/Config/LCDConf.c \
+drivers/STemWin/Config/ILI9328.c \
+drivers/STemWin/Config/GUI_X.c 
 
 # ASM sources
 ASM_SOURCES =  \
@@ -115,7 +121,9 @@ C_INCLUDES =  \
 -Idrivers/STM32F1xx_HAL_Driver/Inc \
 -Idrivers/STM32F1xx_HAL_Driver/Inc/Legacy \
 -Idrivers/CMSIS/Device/ST/STM32F1xx/Include \
--Idrivers/CMSIS/Include
+-Idrivers/CMSIS/Include \
+-Idrivers/STemWin/Config \
+-Idrivers/STemWin/Config/Inc
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
@@ -139,6 +147,7 @@ LDSCRIPT = STM32F103C8Tx_FLASH.ld
 # libraries
 LIBS = -lc -lm -lnosys
 LIBDIR =
+STMWINLIB = $(STEMWINLIBPATH)/libSTemWin532_CM3_GCC.a
 LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) \
 -Wl,-Map=build/$(TARGET).map,--cref -Wl,--gc-sections
 
@@ -163,7 +172,7 @@ build/%.o: %.s
 	$(AS) -c $(CFLAGS) $< -o $@
 
 $(TARGET).elf: $(OBJECTS)
-	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
+	$(CC) $(OBJECTS) $(STMWINLIB) $(LDFLAGS) -o $@
 	$(SZ) $@
 
 %.hex: %.elf

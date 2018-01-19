@@ -1,8 +1,11 @@
 #ifndef __ILI9328_H
 #define __ILI9328_H
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <stdint.h>
 
 #define RESET_MODE_GLCD	GPIO_CRH_MODE12_0
 #define RESET_GLCD	GPIO_ODR_ODR12
@@ -26,4 +29,5 @@ void ILI9328_Test();
 #ifdef __cplusplus
 }
 #endif
+
 #endif

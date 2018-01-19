@@ -27,9 +27,13 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : GUIConf.h
-Purpose     : Configures emWins abilities, fonts etc.
-----------------------------------------------------------------------
+File        : GUI_FontIntern.h
+Purpose     : Internal decalrations used in font files
+---------------------------END-OF-HEADER------------------------------
+
+Attention : Do not modify this file ! If you do, you will not
+            be able do update to a later GUI version !
+
 */
 
 /**
@@ -42,55 +46,52 @@ Purpose     : Configures emWins abilities, fonts etc.
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
   */
+  
+#ifndef  GUI_FONTINTERN_H    /* Guard against multiple inclusion */
+#define  GUI_FONTINTERN_H
 
-#ifndef GUICONF_H
-#define GUICONF_H
+#include "GUI.h"
 
-/*********************************************************************
-*
-*       Multi layer/display support
-*/
-#define GUI_NUM_LAYERS            1    // Maximum number of available layers
-
-/*********************************************************************
-*
-*       Multi tasking support
-*/
-#ifdef OS_SUPPORT
- #define GUI_OS                    (1)  // Compile with multitasking support
-#else
- #define GUI_OS                    (0)
+#if defined(__cplusplus)
+extern "C" {     /* Make sure we have C-declarations in C++ programs */
 #endif
 
-/*********************************************************************
-*
-*       Configuration of touch support
-*/
-#ifndef   GUI_SUPPORT_TOUCH
-  #define GUI_SUPPORT_TOUCH       (1)  // Support touchscreen
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_Font8ASCII_Prop;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_FontF8x13_ASCII_Prop1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_FontF8x15B_ASCII_Prop1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_Font10S_ASCII_FontProp1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_Font10ASCIIProp1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_Font13ASCII_Prop1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_Font13B_ASCII_Prop1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_Font13H_ASCII_Prop1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_Font13HB_ASCII_Prop1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_Font16_1_FontProp1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_Font16ASCIIProp1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_Font16B_ASCII_Prop1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_Font20_ASCII_Prop1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_Font20B_ASCII_Prop1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_Font24_ASCII_Prop1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_Font24B_ASCII_Prop1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_Font32_ASCII_Prop1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_Font32B_ASCII_Prop1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_FontComic18B_ASCII_Prop1;
+extern GUI_CONST_STORAGE GUI_FONT_PROP GUI_FontComic24B_ASCII_Prop1;
+
+extern GUI_CONST_STORAGE GUI_CHARINFO GUI_Font16_HK_CharInfo[169];
+
+#if defined(__cplusplus)
+  }
 #endif
 
-/*********************************************************************
-*
-*       Default font
-*/
-#define GUI_DEFAULT_FONT          &GUI_Font6x8
 
-/*********************************************************************
-*
-*         Configuration of available packages
-*/
-#define GUI_SUPPORT_MOUSE             (0)    /* Support a mouse */
-#define GUI_WINSUPPORT                (0)    /* Use window manager */
-#define GUI_SUPPORT_MEMDEV            (1)    /* Memory device package available */
-#define GUI_SUPPORT_DEVICES           (1)    /* Enable use of device pointers */
+#endif   /* Guard against multiple inclusion */
 
-#endif  /* Avoid multiple inclusion */
+/*************************** End of file ****************************/

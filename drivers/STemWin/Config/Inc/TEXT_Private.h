@@ -27,9 +27,9 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : GUIConf.h
-Purpose     : Configures emWins abilities, fonts etc.
-----------------------------------------------------------------------
+File        : TEXT.h
+Purpose     : TEXT include
+--------------------END-OF-HEADER-------------------------------------
 */
 
 /**
@@ -42,55 +42,69 @@ Purpose     : Configures emWins abilities, fonts etc.
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
   */
+  
+#ifndef TEXT_PRIVATE_H
+#define TEXT_PRIVATE_H
 
-#ifndef GUICONF_H
-#define GUICONF_H
+#include "TEXT.h"
+#include "GUI_Private.h"
+
+#if GUI_WINSUPPORT
 
 /*********************************************************************
 *
-*       Multi layer/display support
+*       Object definition
+*
+**********************************************************************
 */
-#define GUI_NUM_LAYERS            1    // Maximum number of available layers
+typedef struct {
+  const GUI_FONT * pFont;
+  GUI_COLOR TextColor;
+  GUI_COLOR BkColor;
+  GUI_WRAPMODE WrapMode;
+} TEXT_PROPS;
+
+typedef struct {
+  WIDGET Widget;
+  TEXT_PROPS Props;
+  WM_HMEM hpText;
+  I16 Align;
+} TEXT_OBJ;
 
 /*********************************************************************
 *
-*       Multi tasking support
+*       Macros for internal use
+*
+**********************************************************************
 */
-#ifdef OS_SUPPORT
- #define GUI_OS                    (1)  // Compile with multitasking support
+#if GUI_DEBUG_LEVEL >= GUI_DEBUG_LEVEL_CHECK_ALL
+  #define TEXT_INIT_ID(p) p->Widget.DebugId = TEXT_ID
 #else
- #define GUI_OS                    (0)
+  #define TEXT_INIT_ID(p)
+#endif
+
+#if GUI_DEBUG_LEVEL >= GUI_DEBUG_LEVEL_CHECK_ALL
+  TEXT_OBJ * TEXT_LockH(TEXT_Handle h);
+  #define TEXT_LOCK_H(h)   TEXT_LockH(h)
+#else
+  #define TEXT_LOCK_H(h)   (TEXT_OBJ *)GUI_LOCK_H(h)
 #endif
 
 /*********************************************************************
 *
-*       Configuration of touch support
-*/
-#ifndef   GUI_SUPPORT_TOUCH
-  #define GUI_SUPPORT_TOUCH       (1)  // Support touchscreen
-#endif
-
-/*********************************************************************
+*       Module internal data
 *
-*       Default font
+**********************************************************************
 */
-#define GUI_DEFAULT_FONT          &GUI_Font6x8
+extern TEXT_PROPS TEXT__DefaultProps;
 
-/*********************************************************************
-*
-*         Configuration of available packages
-*/
-#define GUI_SUPPORT_MOUSE             (0)    /* Support a mouse */
-#define GUI_WINSUPPORT                (0)    /* Use window manager */
-#define GUI_SUPPORT_MEMDEV            (1)    /* Memory device package available */
-#define GUI_SUPPORT_DEVICES           (1)    /* Enable use of device pointers */
-
-#endif  /* Avoid multiple inclusion */
+#endif   /* if GUI_WINSUPPORT */
+#endif   /* TEXT_PRIVATE_H */

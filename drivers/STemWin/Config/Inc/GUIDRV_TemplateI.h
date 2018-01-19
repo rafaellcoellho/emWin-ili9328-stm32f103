@@ -27,9 +27,9 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : GUIConf.h
-Purpose     : Configures emWins abilities, fonts etc.
-----------------------------------------------------------------------
+File        : GUIDRV_TemplateI.h
+Purpose     : Interface definition for GUIDRV_TemplateI driver
+---------------------------END-OF-HEADER------------------------------
 */
 
 /**
@@ -42,55 +42,88 @@ Purpose     : Configures emWins abilities, fonts etc.
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
   */
+  
+#ifndef GUIDRV_TEMPLATE_I_H
+#define GUIDRV_TEMPLATE_I_H
 
-#ifndef GUICONF_H
-#define GUICONF_H
-
-/*********************************************************************
-*
-*       Multi layer/display support
-*/
-#define GUI_NUM_LAYERS            1    // Maximum number of available layers
+#if defined(__cplusplus)
+extern "C" {     /* Make sure we have C-declarations in C++ programs */
+#endif
 
 /*********************************************************************
 *
-*       Multi tasking support
+*       Configuration structure
 */
-#ifdef OS_SUPPORT
- #define GUI_OS                    (1)  // Compile with multitasking support
+typedef struct {
+  //
+  // Driver specific configuration items
+  //
+  int Dummy;
+} CONFIG_TEMPLATE_I;
+
+/*********************************************************************
+*
+*       Display drivers
+*/
+//
+// Addresses
+//
+extern const GUI_DEVICE_API GUIDRV_TEMPLATE_I_16_API;
+extern const GUI_DEVICE_API GUIDRV_TEMPLATE_I_OY_16_API;
+extern const GUI_DEVICE_API GUIDRV_TEMPLATE_I_OX_16_API;
+extern const GUI_DEVICE_API GUIDRV_TEMPLATE_I_OXY_16_API;
+extern const GUI_DEVICE_API GUIDRV_TEMPLATE_I_OS_16_API;
+extern const GUI_DEVICE_API GUIDRV_TEMPLATE_I_OSY_16_API;
+extern const GUI_DEVICE_API GUIDRV_TEMPLATE_I_OSX_16_API;
+extern const GUI_DEVICE_API GUIDRV_TEMPLATE_I_OSXY_16_API;
+
+//
+// Macros to be used in configuration files
+//
+#if defined(WIN32) && !defined(LCD_SIMCONTROLLER)
+
+  #define GUIDRV_TEMPLATE_I_16       &GUIDRV_Win_API
+  #define GUIDRV_TEMPLATE_I_OY_16    &GUIDRV_Win_API
+  #define GUIDRV_TEMPLATE_I_OX_16    &GUIDRV_Win_API
+  #define GUIDRV_TEMPLATE_I_OXY_16   &GUIDRV_Win_API
+  #define GUIDRV_TEMPLATE_I_OS_16    &GUIDRV_Win_API
+  #define GUIDRV_TEMPLATE_I_OSY_16   &GUIDRV_Win_API
+  #define GUIDRV_TEMPLATE_I_OSX_16   &GUIDRV_Win_API
+  #define GUIDRV_TEMPLATE_I_OSXY_16  &GUIDRV_Win_API
+
 #else
- #define GUI_OS                    (0)
+
+  #define GUIDRV_TEMPLATE_I_16       &GUIDRV_TEMPLATE_I_16_API
+  #define GUIDRV_TEMPLATE_I_OY_16    &GUIDRV_TEMPLATE_I_OY_16_API
+  #define GUIDRV_TEMPLATE_I_OX_16    &GUIDRV_TEMPLATE_I_OX_16_API
+  #define GUIDRV_TEMPLATE_I_OXY_16   &GUIDRV_TEMPLATE_I_OXY_16_API
+  #define GUIDRV_TEMPLATE_I_OS_16    &GUIDRV_TEMPLATE_I_OS_16_API
+  #define GUIDRV_TEMPLATE_I_OSY_16   &GUIDRV_TEMPLATE_I_OSY_16_API
+  #define GUIDRV_TEMPLATE_I_OSX_16   &GUIDRV_TEMPLATE_I_OSX_16_API
+  #define GUIDRV_TEMPLATE_I_OSXY_16  &GUIDRV_TEMPLATE_I_OSXY_16_API
+
 #endif
 
 /*********************************************************************
 *
-*       Configuration of touch support
+*       Public routines
 */
-#ifndef   GUI_SUPPORT_TOUCH
-  #define GUI_SUPPORT_TOUCH       (1)  // Support touchscreen
+void GUIDRV_TemplateI_Config    (GUI_DEVICE * pDevice, CONFIG_TEMPLATE_I * pConfig);
+void GUIDRV_TemplateI_SetBus_XXX(GUI_DEVICE * pDevice, GUI_PORT_API * pHW_API);
+void GUIDRV_TemplateI_SetFuncXXX(GUI_DEVICE * pDevice);
+
+#if defined(__cplusplus)
+}
 #endif
 
-/*********************************************************************
-*
-*       Default font
-*/
-#define GUI_DEFAULT_FONT          &GUI_Font6x8
+#endif
 
-/*********************************************************************
-*
-*         Configuration of available packages
-*/
-#define GUI_SUPPORT_MOUSE             (0)    /* Support a mouse */
-#define GUI_WINSUPPORT                (0)    /* Use window manager */
-#define GUI_SUPPORT_MEMDEV            (1)    /* Memory device package available */
-#define GUI_SUPPORT_DEVICES           (1)    /* Enable use of device pointers */
-
-#endif  /* Avoid multiple inclusion */
+/*************************** End of file ****************************/

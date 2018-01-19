@@ -27,9 +27,13 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : LCDConf_FlexColor_Template.c
-Purpose     : Display controller configuration (single layer)
+File        : GUI_VNC.h
+Purpose     : Publics for the VNC server
 ---------------------------END-OF-HEADER------------------------------
+
+Attention : Do not modify this file ! If you do, you will not
+            be able do update to a later GUI version !
+
 */
 
 /**
@@ -42,131 +46,111 @@ Purpose     : Display controller configuration (single layer)
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
   */
+  
+#ifndef  GUI_VNC_H
+#define  GUI_VNC_H
 
-#include "GUI.h"
-#include "GUIDRV_FlexColor.h"
-#include "ILI9328.h"
+#include "GUI_Private.h"
+#include "GUI_Type.h"
+
+#if defined(__cplusplus)
+extern "C" {     /* Make sure we have C-declarations in C++ programs */
+#endif
+
 
 /*********************************************************************
 *
-*       Layer configuration (to be modified)
+*       Defines
 *
 **********************************************************************
 */
+#define GUI_VNC_NO_ERROR            0
+#define GUI_VNC_ERROR_MISC          1
+#define GUI_VNC_ERROR_WRONGFORMAT   2
 
-//
-// Physical display size
-//
-#define XSIZE_PHYS  240 // To be adapted to x-screen size
-#define YSIZE_PHYS  320 // To be adapted to y-screen size
+#define GUI_DES_ENCRYPT 0
+#define GUI_DES_DECRYPT 1
 
 /*********************************************************************
 *
-*       Configuration checking
+*       Types
 *
 **********************************************************************
 */
-#ifndef   VXSIZE_PHYS
-  #define VXSIZE_PHYS XSIZE_PHYS
-#endif
-#ifndef   VYSIZE_PHYS
-  #define VYSIZE_PHYS YSIZE_PHYS
-#endif
-#ifndef   XSIZE_PHYS
-  #error Physical X size of display is not defined!
-#endif
-#ifndef   YSIZE_PHYS
-  #error Physical Y size of display is not defined!
-#endif
-#ifndef   GUICC_565
-  #error Color conversion not defined!
-#endif
-#ifndef   GUIDRV_FLEXCOLOR
-  #error No display driver defined!
-#endif
+typedef struct GUI_VNC_CONTEXT {
+  GUI_DEVICE * pDevice;
+  struct GUI_VNC_CONTEXT * pNext;
+  int LayerIndex;
+  int BytesPerPixel;
+  int BitsPerPixel;  // Note, that from within the VNC server the function LCD_GetBitsBerPixel() can not be used because the VNC server runs in a separate thread and the device chain can change during the function call
+  //
+  // Connection related data
+  //
+  GUI_tSend    pfSend;
+  GUI_tRecv    pfReceive;
+  void       * pConnectInfo;
+  U16          ServerIndex;
+  //
+  // Display related info
+  //
+  int x0Dirty, y0Dirty, x1Dirty, y1Dirty;
+  int xSize, ySize;
+  int xOrg, yOrg, xOrgNew, yOrgNew;
+  int OrgLock;
+  //
+  // Status
+  //
+  char ClientSupportsHextile;
+  char IsBigEndian;
+} GUI_VNC_CONTEXT;
+
+typedef struct {
+  void (* pfGetChallenge)(U8 * pChallenge);
+  void (* pfGetResponse )(U8 * pResponse );
+} GUI_VNC_AUTHENTICATION;
 
 /*********************************************************************
 *
-*       Public functions
+*       Private Functions
 *
 **********************************************************************
 */
-/*********************************************************************
-*
-*       LCD_X_Config
-*
-* Function description:
-*   Called during the initialization process in order to set up the
-*   display driver configuration.
-*
-*/
-void LCD_X_Config(void) {
-  GUI_DEVICE *pDevice;
-  CONFIG_FLEXCOLOR Config = {0};
-  GUI_PORT_API PortAPI = {0};
-  //
-  // Set display driver and color conversion
-  //
-  pDevice = GUI_DEVICE_CreateAndLink(GUIDRV_FLEXCOLOR, GUICC_565, 0, 0);
-  //
-  // Orientation
-  //
-  Config.Orientation = GUI_SWAP_XY | GUI_MIRROR_Y;
-  GUIDRV_FlexColor_Config(pDevice, &Config);
-  //
-  // Set controller and operation mode
-  //
-  PortAPI.pfWrite8_A0  = ILI9328_WriteRS0;
-  PortAPI.pfWrite8_A1  = ILI9328_WriteRS1;
-  PortAPI.pfWriteM8_A1 = ILI9328_MultiWriteRS1;
-  PortAPI.pfRead8_A1  = ILI9328_ReadRS1;
-  PortAPI.pfReadM8_A1 = ILI9328_MultiReadRS1;
-  GUIDRV_FlexColor_SetFunc(pDevice, &PortAPI, GUIDRV_FLEXCOLOR_F66708, GUIDRV_FLEXCOLOR_M16C0B8);
-}
+void GUI_VNC_SetDESKey(U8 * pKey, int Mode);
+void GUI_VNC_DoDES    (U8 * pInblock, U8 * pOutblock);
 
 /*********************************************************************
 *
-*       LCD_X_DisplayDriver
+*       Public Functions
 *
-* Function description:
-*   This function is called by the display driver for several purposes.
-*   To support the according task the routine needs to be adapted to
-*   the display controller. Please note that the commands marked with
-*   'optional' are not cogently required and should only be adapted if
-*   the display controller supports these features.
-*
-* Parameter:
-*   LayerIndex - Index of layer to be configured
-*   Cmd        - Please refer to the details in the switch statement below
-*   pData      - Pointer to a LCD_X_DATA structure
-*
-* Return Value:
-*   < -1 - Error
-*     -1 - Command not handled
-*      0 - Ok
+**********************************************************************
 */
-int LCD_X_DisplayDriver(unsigned LayerIndex, unsigned Cmd, void * pData) {
-  int r;
-  (void) LayerIndex;
-  (void) pData;
+void GUI_VNC_AttachToLayer      (GUI_VNC_CONTEXT * pContext, int LayerIndex);
+void GUI_VNC_EnableKeyboardInput(int OnOff);
+int  GUI_VNC_GetNumConnections  (void);
+int  GUI_VNC_Process            (GUI_VNC_CONTEXT * pContext, GUI_tSend pfSend, GUI_tRecv pfReceive, void * pConnectInfo);
+void GUI_VNC_RingBell           (void);
+void GUI_VNC_SetAuthentication  (GUI_VNC_AUTHENTICATION * pAuthentication);
+void GUI_VNC_SetPassword        (U8 * sPassword);
+void GUI_VNC_SetProgName        (const char * sProgName);
+void GUI_VNC_SetSize            (unsigned xSize, unsigned ySize);
+void GUI_VNC_SetLockFrame       (unsigned OnOff);
 
-  switch (Cmd) {
-  case LCD_X_INITCONTROLLER: {
-    ILI9328_Init();
-    return 0;
+/****  External routine to link the server to the system ... USER defined ! ****/
+int  GUI_VNC_X_StartServer(int LayerIndex, int ServerIndex);
+void GUI_VNC_X_getpeername(U32 * Addr);
+
+#if defined(__cplusplus)
   }
-  default:
-    r = -1;
-  }
-  return r;
-}
+#endif
+
+#endif   /* Avoid multiple inclusion */
 
 /*************************** End of file ****************************/

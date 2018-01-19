@@ -27,9 +27,9 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : GUIConf.h
-Purpose     : Configures emWins abilities, fonts etc.
-----------------------------------------------------------------------
+File        : HEADER_Private.h
+Purpose     : Private HEADER include
+--------------------END-OF-HEADER-------------------------------------
 */
 
 /**
@@ -42,55 +42,104 @@ Purpose     : Configures emWins abilities, fonts etc.
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
   */
+  
+#ifndef HEADER_PRIVATE_H
+#define HEADER_PRIVATE_H
 
-#ifndef GUICONF_H
-#define GUICONF_H
+
+#include "HEADER.h"
+#include "WIDGET.h"
+#include "WM.h"
+#include "GUI_ARRAY.h"
+
+#if GUI_WINSUPPORT
 
 /*********************************************************************
 *
-*       Multi layer/display support
+*       Object definition
+*
+**********************************************************************
 */
-#define GUI_NUM_LAYERS            1    // Maximum number of available layers
+typedef struct {
+  int     Width;
+  I16     Align;
+  WM_HMEM hDrawObj;
+  char    acText[1];
+} HEADER_COLUMN;
+
+typedef struct {
+  WIDGET_DRAW_ITEM_FUNC * pfDrawSkin;
+} HEADER_SKIN_PRIVATE;
+
+typedef struct {
+  const GUI_FONT    * pFont;
+  GUI_COLOR           BkColor;
+  GUI_COLOR           TextColor;
+  GUI_COLOR           ArrowColor;
+  HEADER_SKIN_PRIVATE SkinPrivate;
+} HEADER_PROPS;
+
+typedef struct {
+  WIDGET              Widget;
+  HEADER_PROPS        Props;
+  WIDGET_SKIN const * pWidgetSkin;
+  GUI_ARRAY           Columns;
+  int                 CapturePosX;
+  int                 CaptureItem;
+  int                 ScrollPos;
+  int                 Sel;
+  int                 DirIndicatorColumn;
+  int                 DirIndicatorReverse;
+  unsigned            Fixed;
+  U8                  DragLimit;
+} HEADER_Obj;
 
 /*********************************************************************
 *
-*       Multi tasking support
+*       Private (module internal) data
+*
+**********************************************************************
 */
-#ifdef OS_SUPPORT
- #define GUI_OS                    (1)  // Compile with multitasking support
+
+extern HEADER_PROPS        HEADER__DefaultProps;
+extern const GUI_CURSOR  * HEADER__pDefaultCursor;
+extern int                 HEADER__DefaultBorderH;
+extern int                 HEADER__DefaultBorderV;
+
+extern const WIDGET_SKIN   HEADER__SkinClassic;
+extern       WIDGET_SKIN   HEADER__Skin;
+
+extern WIDGET_SKIN const * HEADER__pSkinDefault;
+
+/*********************************************************************
+*
+*       Macros for internal use
+*
+**********************************************************************
+*/
+#if GUI_DEBUG_LEVEL >= GUI_DEBUG_LEVEL_CHECK_ALL
+  #define HEADER_INIT_ID(p)  (p->Widget.DebugId = HEADER_ID)
 #else
- #define GUI_OS                    (0)
+  #define HEADER_INIT_ID(p)
 #endif
 
-/*********************************************************************
-*
-*       Configuration of touch support
-*/
-#ifndef   GUI_SUPPORT_TOUCH
-  #define GUI_SUPPORT_TOUCH       (1)  // Support touchscreen
+#if GUI_DEBUG_LEVEL >= GUI_DEBUG_LEVEL_CHECK_ALL
+  HEADER_Obj * HEADER_LockH(HEADER_Handle h);
+  #define HEADER_LOCK_H(h)   HEADER_LockH(h)
+#else
+  #define HEADER_LOCK_H(h)   (HEADER_Obj *)GUI_LOCK_H(h)
 #endif
 
-/*********************************************************************
-*
-*       Default font
-*/
-#define GUI_DEFAULT_FONT          &GUI_Font6x8
+void HEADER__SetDrawObj(HEADER_Handle hObj, unsigned Index, GUI_DRAW_HANDLE hDrawObj);
 
-/*********************************************************************
-*
-*         Configuration of available packages
-*/
-#define GUI_SUPPORT_MOUSE             (0)    /* Support a mouse */
-#define GUI_WINSUPPORT                (0)    /* Use window manager */
-#define GUI_SUPPORT_MEMDEV            (1)    /* Memory device package available */
-#define GUI_SUPPORT_DEVICES           (1)    /* Enable use of device pointers */
 
-#endif  /* Avoid multiple inclusion */
+#endif // GUI_WINSUPPORT
+#endif // Avoid multiple inclusion

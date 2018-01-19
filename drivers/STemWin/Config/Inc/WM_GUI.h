@@ -27,8 +27,8 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : GUIConf.h
-Purpose     : Configures emWins abilities, fonts etc.
+File        : WM_GUI.h
+Purpose     : Windows manager include for low level GUI routines
 ----------------------------------------------------------------------
 */
 
@@ -42,55 +42,51 @@ Purpose     : Configures emWins abilities, fonts etc.
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
   */
+  
+#ifndef WM_GUI_H            /* Make sure we only include it once */
+#define WM_GUI_H
 
-#ifndef GUICONF_H
-#define GUICONF_H
-
-/*********************************************************************
-*
-*       Multi layer/display support
-*/
-#define GUI_NUM_LAYERS            1    // Maximum number of available layers
-
-/*********************************************************************
-*
-*       Multi tasking support
-*/
-#ifdef OS_SUPPORT
- #define GUI_OS                    (1)  // Compile with multitasking support
-#else
- #define GUI_OS                    (0)
+#if defined(__cplusplus)
+extern "C" {     /* Make sure we have C-declarations in C++ programs */
 #endif
 
-/*********************************************************************
-*
-*       Configuration of touch support
-*/
-#ifndef   GUI_SUPPORT_TOUCH
-  #define GUI_SUPPORT_TOUCH       (1)  // Support touchscreen
+int       WM__InitIVRSearch(const GUI_RECT* pMaxRect);
+int       WM__GetNextIVR   (void);
+int       WM__GetOrgX_AA(void);
+int       WM__GetOrgY_AA(void);
+
+#define WM_ITERATE_START(pRect)                   \
+  {                                               \
+    if (WM__InitIVRSearch(pRect))                 \
+      do {
+
+#define WM_ITERATE_END()                          \
+    } while (WM__GetNextIVR());                   \
+  }
+
+#define WM_ADDORGX(x)       (x += GUI_pContext->xOff)
+#define WM_ADDORGY(y)       (y += GUI_pContext->yOff)
+#define WM_ADDORG(x0,y0)    WM_ADDORGX(x0); WM_ADDORGY(y0)
+#define WM_ADDORGX_AA(x)    (x += WM__GetOrgX_AA())
+#define WM_ADDORGY_AA(y)    (y += WM__GetOrgY_AA())
+#define WM_ADDORG_AA(x0,y0) WM_ADDORGX_AA(x0); WM_ADDORGY_AA(y0)
+#define WM_SUBORGX(x)       (x -= GUI_pContext->xOff)
+#define WM_SUBORGY(y)       (y -= GUI_pContext->yOff)
+#define WM_SUBORG(x0,y0)    WM_SUBORGX(x0); WM_SUBORGY(y0)
+
+#if defined(__cplusplus)
+  }
 #endif
 
-/*********************************************************************
-*
-*       Default font
-*/
-#define GUI_DEFAULT_FONT          &GUI_Font6x8
 
-/*********************************************************************
-*
-*         Configuration of available packages
-*/
-#define GUI_SUPPORT_MOUSE             (0)    /* Support a mouse */
-#define GUI_WINSUPPORT                (0)    /* Use window manager */
-#define GUI_SUPPORT_MEMDEV            (1)    /* Memory device package available */
-#define GUI_SUPPORT_DEVICES           (1)    /* Enable use of device pointers */
+#endif   /* Avoid multiple inclusion */
 
-#endif  /* Avoid multiple inclusion */
+/*************************** End of file ****************************/

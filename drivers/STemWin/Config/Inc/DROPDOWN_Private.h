@@ -27,9 +27,9 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : LCDConf_FlexColor_Template.c
-Purpose     : Display controller configuration (single layer)
----------------------------END-OF-HEADER------------------------------
+File        : DROPDOWN_Private.h
+Purpose     : DROPDOWN private header file
+--------------------END-OF-HEADER-------------------------------------
 */
 
 /**
@@ -42,131 +42,113 @@ Purpose     : Display controller configuration (single layer)
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
   */
+  
+#ifndef DROPDOWN_PRIVATE_H
+#define DROPDOWN_PRIVATE_H
 
-#include "GUI.h"
-#include "GUIDRV_FlexColor.h"
-#include "ILI9328.h"
+#include "DROPDOWN.h"
+#include "WIDGET.h"
+#include "GUI_ARRAY.h"
+
+#if GUI_WINSUPPORT
 
 /*********************************************************************
 *
-*       Layer configuration (to be modified)
+*       Defines
+*
+**********************************************************************
+*/
+#define DROPDOWN_SF_AUTOSCROLLBAR DROPDOWN_CF_AUTOSCROLLBAR
+
+/*********************************************************************
+*
+*       Object definition
+*
+**********************************************************************
+*/
+typedef struct {
+  WIDGET_DRAW_ITEM_FUNC * pfDrawSkin;
+} DROPDOWN_SKIN_PRIVATE;
+
+typedef struct {
+  const GUI_FONT * pFont;
+  GUI_COLOR aBackColor[3];
+  GUI_COLOR aTextColor[3];
+  GUI_COLOR aColor[2];
+  GUI_COLOR aScrollbarColor[3];
+  DROPDOWN_SKIN_PRIVATE SkinPrivate;
+  I16       TextBorderSize;
+  I16       Align;
+} DROPDOWN_PROPS;
+
+typedef struct {
+  WIDGET  Widget;
+  I16     Sel;        // Current selection
+  I16     ySizeLB;    // ySize of assigned LISTBOX in expanded state
+  I16     TextHeight;
+  GUI_ARRAY Handles;
+  WM_SCROLL_STATE ScrollState;
+  DROPDOWN_PROPS Props;
+  WIDGET_SKIN const * pWidgetSkin;
+  WM_HWIN hListWin;
+  U8      Flags;
+  U16     ItemSpacing;
+  U8      ScrollbarWidth;
+  char  IsPressed;
+  WM_HMEM hDisabled;
+} DROPDOWN_Obj;
+
+/*********************************************************************
+*
+*       Macros for internal use
+*
+**********************************************************************
+*/
+#if GUI_DEBUG_LEVEL >= GUI_DEBUG_LEVEL_CHECK_ALL
+  #define DROPDOWN_INIT_ID(p) (p->Widget.DebugId = DROPDOWN_ID)
+#else
+  #define DROPDOWN_INIT_ID(p)
+#endif
+
+#if GUI_DEBUG_LEVEL >= GUI_DEBUG_LEVEL_CHECK_ALL
+  DROPDOWN_Obj * DROPDOWN_LockH(DROPDOWN_Handle h);
+  #define DROPDOWN_LOCK_H(h)   DROPDOWN_LockH(h)
+#else
+  #define DROPDOWN_LOCK_H(h)   (DROPDOWN_Obj *)GUI_LOCK_H(h)
+#endif
+
+/*********************************************************************
+*
+*       Private (module internal) data
 *
 **********************************************************************
 */
 
-//
-// Physical display size
-//
-#define XSIZE_PHYS  240 // To be adapted to x-screen size
-#define YSIZE_PHYS  320 // To be adapted to y-screen size
+extern DROPDOWN_PROPS DROPDOWN__DefaultProps;
+
+extern const WIDGET_SKIN DROPDOWN__SkinClassic;
+extern       WIDGET_SKIN DROPDOWN__Skin;
+
+extern WIDGET_SKIN const * DROPDOWN__pSkinDefault;
 
 /*********************************************************************
 *
-*       Configuration checking
+*       Private functions
 *
 **********************************************************************
 */
-#ifndef   VXSIZE_PHYS
-  #define VXSIZE_PHYS XSIZE_PHYS
-#endif
-#ifndef   VYSIZE_PHYS
-  #define VYSIZE_PHYS YSIZE_PHYS
-#endif
-#ifndef   XSIZE_PHYS
-  #error Physical X size of display is not defined!
-#endif
-#ifndef   YSIZE_PHYS
-  #error Physical Y size of display is not defined!
-#endif
-#ifndef   GUICC_565
-  #error Color conversion not defined!
-#endif
-#ifndef   GUIDRV_FLEXCOLOR
-  #error No display driver defined!
-#endif
 
-/*********************************************************************
-*
-*       Public functions
-*
-**********************************************************************
-*/
-/*********************************************************************
-*
-*       LCD_X_Config
-*
-* Function description:
-*   Called during the initialization process in order to set up the
-*   display driver configuration.
-*
-*/
-void LCD_X_Config(void) {
-  GUI_DEVICE *pDevice;
-  CONFIG_FLEXCOLOR Config = {0};
-  GUI_PORT_API PortAPI = {0};
-  //
-  // Set display driver and color conversion
-  //
-  pDevice = GUI_DEVICE_CreateAndLink(GUIDRV_FLEXCOLOR, GUICC_565, 0, 0);
-  //
-  // Orientation
-  //
-  Config.Orientation = GUI_SWAP_XY | GUI_MIRROR_Y;
-  GUIDRV_FlexColor_Config(pDevice, &Config);
-  //
-  // Set controller and operation mode
-  //
-  PortAPI.pfWrite8_A0  = ILI9328_WriteRS0;
-  PortAPI.pfWrite8_A1  = ILI9328_WriteRS1;
-  PortAPI.pfWriteM8_A1 = ILI9328_MultiWriteRS1;
-  PortAPI.pfRead8_A1  = ILI9328_ReadRS1;
-  PortAPI.pfReadM8_A1 = ILI9328_MultiReadRS1;
-  GUIDRV_FlexColor_SetFunc(pDevice, &PortAPI, GUIDRV_FLEXCOLOR_F66708, GUIDRV_FLEXCOLOR_M16C0B8);
-}
+void DROPDOWN__AdjustHeight(DROPDOWN_Handle hObj);
+int  DROPDOWN__GetNumItems (DROPDOWN_Obj * pObj);
+const char * DROPDOWN__GetpItemLocked(DROPDOWN_Handle hObj, int Index);
 
-/*********************************************************************
-*
-*       LCD_X_DisplayDriver
-*
-* Function description:
-*   This function is called by the display driver for several purposes.
-*   To support the according task the routine needs to be adapted to
-*   the display controller. Please note that the commands marked with
-*   'optional' are not cogently required and should only be adapted if
-*   the display controller supports these features.
-*
-* Parameter:
-*   LayerIndex - Index of layer to be configured
-*   Cmd        - Please refer to the details in the switch statement below
-*   pData      - Pointer to a LCD_X_DATA structure
-*
-* Return Value:
-*   < -1 - Error
-*     -1 - Command not handled
-*      0 - Ok
-*/
-int LCD_X_DisplayDriver(unsigned LayerIndex, unsigned Cmd, void * pData) {
-  int r;
-  (void) LayerIndex;
-  (void) pData;
-
-  switch (Cmd) {
-  case LCD_X_INITCONTROLLER: {
-    ILI9328_Init();
-    return 0;
-  }
-  default:
-    r = -1;
-  }
-  return r;
-}
-
-/*************************** End of file ****************************/
+#endif // GUI_WINSUPPORT
+#endif // DROPDOWN_PRIVATE_H

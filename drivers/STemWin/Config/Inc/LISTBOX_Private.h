@@ -27,9 +27,9 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : LCDConf_FlexColor_Template.c
-Purpose     : Display controller configuration (single layer)
----------------------------END-OF-HEADER------------------------------
+File        : LISTBOX_Private.h
+Purpose     : Private LISTBOX include
+--------------------END-OF-HEADER-------------------------------------
 */
 
 /**
@@ -42,131 +42,120 @@ Purpose     : Display controller configuration (single layer)
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
   */
+  
+#ifndef LISTBOX_PRIVATE_H
+#define LISTBOX_PRIVATE_H
 
-#include "GUI.h"
-#include "GUIDRV_FlexColor.h"
-#include "ILI9328.h"
+#include "LISTBOX.h"
+#include "WM.h"
+#include "GUI_ARRAY.h"
+#include "WIDGET.h"
+
+#if GUI_WINSUPPORT
 
 /*********************************************************************
 *
-*       Layer configuration (to be modified)
+*       Defines
+*
+**********************************************************************
+*/
+#define LISTBOX_ITEM_SELECTED (1 << 0)
+#define LISTBOX_ITEM_DISABLED (1 << 1)
+
+/*********************************************************************
+*
+*       Object definition
 *
 **********************************************************************
 */
 
-//
-// Physical display size
-//
-#define XSIZE_PHYS  240 // To be adapted to x-screen size
-#define YSIZE_PHYS  320 // To be adapted to y-screen size
+typedef struct {
+  U16  xSize, ySize;
+  I32  ItemPosY;
+  U8   Status;
+  char acText[1];
+} LISTBOX_ITEM;
+
+typedef struct {
+  const GUI_FONT * pFont;
+  U16              ScrollStepH;
+  GUI_COLOR aBackColor[4];
+  GUI_COLOR aTextColor[4];
+  GUI_COLOR aScrollbarColor[3];
+  I16 Align;
+} LISTBOX_PROPS;
+
+typedef struct {
+  WIDGET Widget;
+  GUI_ARRAY ItemArray;
+  WIDGET_DRAW_ITEM_FUNC* pfDrawItem;
+  WM_SCROLL_STATE ScrollStateV;
+  WM_SCROLL_STATE ScrollStateH;
+  LISTBOX_PROPS Props;
+  WM_HWIN hOwner;
+  I16 Sel;                        /* current selection */
+  U8 Flags;
+  U8  ScrollbarWidth;
+  U16 ItemSpacing;
+  U16 ContentSizeX;
+} LISTBOX_Obj;
 
 /*********************************************************************
 *
-*       Configuration checking
+*       Macros for internal use
 *
 **********************************************************************
 */
-#ifndef   VXSIZE_PHYS
-  #define VXSIZE_PHYS XSIZE_PHYS
+#if GUI_DEBUG_LEVEL >= GUI_DEBUG_LEVEL_CHECK_ALL
+  #define LISTBOX_INIT_ID(p) p->Widget.DebugId = LISTBOX_ID
+#else
+  #define LISTBOX_INIT_ID(p)
 #endif
-#ifndef   VYSIZE_PHYS
-  #define VYSIZE_PHYS YSIZE_PHYS
-#endif
-#ifndef   XSIZE_PHYS
-  #error Physical X size of display is not defined!
-#endif
-#ifndef   YSIZE_PHYS
-  #error Physical Y size of display is not defined!
-#endif
-#ifndef   GUICC_565
-  #error Color conversion not defined!
-#endif
-#ifndef   GUIDRV_FLEXCOLOR
-  #error No display driver defined!
+
+#if GUI_DEBUG_LEVEL >= GUI_DEBUG_LEVEL_CHECK_ALL
+  LISTBOX_Obj * LISTBOX_LockH(LISTBOX_Handle h);
+  #define LISTBOX_LOCK_H(h)   LISTBOX_LockH(h)
+#else
+  #define LISTBOX_LOCK_H(h)   (LISTBOX_Obj *)GUI_LOCK_H(h)
 #endif
 
 /*********************************************************************
 *
-*       Public functions
+*       Private (module internal) data
 *
 **********************************************************************
 */
-/*********************************************************************
-*
-*       LCD_X_Config
-*
-* Function description:
-*   Called during the initialization process in order to set up the
-*   display driver configuration.
-*
-*/
-void LCD_X_Config(void) {
-  GUI_DEVICE *pDevice;
-  CONFIG_FLEXCOLOR Config = {0};
-  GUI_PORT_API PortAPI = {0};
-  //
-  // Set display driver and color conversion
-  //
-  pDevice = GUI_DEVICE_CreateAndLink(GUIDRV_FLEXCOLOR, GUICC_565, 0, 0);
-  //
-  // Orientation
-  //
-  Config.Orientation = GUI_SWAP_XY | GUI_MIRROR_Y;
-  GUIDRV_FlexColor_Config(pDevice, &Config);
-  //
-  // Set controller and operation mode
-  //
-  PortAPI.pfWrite8_A0  = ILI9328_WriteRS0;
-  PortAPI.pfWrite8_A1  = ILI9328_WriteRS1;
-  PortAPI.pfWriteM8_A1 = ILI9328_MultiWriteRS1;
-  PortAPI.pfRead8_A1  = ILI9328_ReadRS1;
-  PortAPI.pfReadM8_A1 = ILI9328_MultiReadRS1;
-  GUIDRV_FlexColor_SetFunc(pDevice, &PortAPI, GUIDRV_FLEXCOLOR_F66708, GUIDRV_FLEXCOLOR_M16C0B8);
-}
+
+extern LISTBOX_PROPS LISTBOX_DefaultProps;
 
 /*********************************************************************
 *
-*       LCD_X_DisplayDriver
+*       Private (module internal) functions
 *
-* Function description:
-*   This function is called by the display driver for several purposes.
-*   To support the according task the routine needs to be adapted to
-*   the display controller. Please note that the commands marked with
-*   'optional' are not cogently required and should only be adapted if
-*   the display controller supports these features.
-*
-* Parameter:
-*   LayerIndex - Index of layer to be configured
-*   Cmd        - Please refer to the details in the switch statement below
-*   pData      - Pointer to a LCD_X_DATA structure
-*
-* Return Value:
-*   < -1 - Error
-*     -1 - Command not handled
-*      0 - Ok
+**********************************************************************
 */
-int LCD_X_DisplayDriver(unsigned LayerIndex, unsigned Cmd, void * pData) {
-  int r;
-  (void) LayerIndex;
-  (void) pData;
+unsigned     LISTBOX__GetNumItems           (const LISTBOX_Obj * pObj);
+const char * LISTBOX__GetpStringLocked      (LISTBOX_Handle hObj, int Index, LISTBOX_ITEM ** ppItem);
+void         LISTBOX__InvalidateInsideArea  (LISTBOX_Handle hObj);
+void         LISTBOX__InvalidateItem        (LISTBOX_Handle hObj, int Sel);
+void         LISTBOX__InvalidateItemAndBelow(LISTBOX_Handle hObj, int Sel);
+void         LISTBOX__InvalidateItemSize    (const LISTBOX_Obj * pObj, unsigned Index);
+void         LISTBOX__SetScrollbarColor     (LISTBOX_Handle hObj, const LISTBOX_Obj * pObj);
+void         LISTBOX__SetScrollbarWidth     (LISTBOX_Handle hObj, const LISTBOX_Obj * pObj);
+void         LISTBOX__AddSize               (LISTBOX_Obj * pObj, int Index);
 
-  switch (Cmd) {
-  case LCD_X_INITCONTROLLER: {
-    ILI9328_Init();
-    return 0;
-  }
-  default:
-    r = -1;
-  }
-  return r;
-}
+#endif /* GUI_WINSUPPORT */
+
+#else                            /* Avoid problems with empty object modules */
+  void LISTBOX_C(void) {}
+#endif
 
 /*************************** End of file ****************************/

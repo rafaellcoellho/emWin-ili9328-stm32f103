@@ -27,9 +27,9 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : GUIConf.h
-Purpose     : Configures emWins abilities, fonts etc.
-----------------------------------------------------------------------
+File        : GUIDRV_Dist.h
+Purpose     : Interface definition for GUIDRV_Dist driver
+---------------------------END-OF-HEADER------------------------------
 */
 
 /**
@@ -42,55 +42,62 @@ Purpose     : Configures emWins abilities, fonts etc.
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
   */
+  
+#ifndef GUIDRV_DIST_H
+#define GUIDRV_DIST_H
 
-#ifndef GUICONF_H
-#define GUICONF_H
-
-/*********************************************************************
-*
-*       Multi layer/display support
-*/
-#define GUI_NUM_LAYERS            1    // Maximum number of available layers
+#if defined(__cplusplus)
+extern "C" {     /* Make sure we have C-declarations in C++ programs */
+#endif
 
 /*********************************************************************
 *
-*       Multi tasking support
+*       Display driver
 */
-#ifdef OS_SUPPORT
- #define GUI_OS                    (1)  // Compile with multitasking support
+//
+// Address
+//
+extern const GUI_DEVICE_API GUIDRV_Dist_API;
+
+//
+// Macros to be used in configuration files
+//
+#if defined(WIN32) && !defined(LCD_SIMCONTROLLER)
+
+  #define GUIDRV_DIST &GUIDRV_Win_API
+
 #else
- #define GUI_OS                    (0)
+
+  #define GUIDRV_DIST &GUIDRV_Dist_API
+
 #endif
 
 /*********************************************************************
 *
-*       Configuration of touch support
+*       Public routines
 */
-#ifndef   GUI_SUPPORT_TOUCH
-  #define GUI_SUPPORT_TOUCH       (1)  // Support touchscreen
+#if defined(WIN32) && !defined(LCD_SIMCONTROLLER)
+
+  #define GUIDRV_Dist_AddDriver(pDevice, pDriver, pRect)
+
+#else
+
+  void GUIDRV_Dist_AddDriver(GUI_DEVICE * pDevice, GUI_DEVICE * pDriver, GUI_RECT * pRect);
+
 #endif
 
-/*********************************************************************
-*
-*       Default font
-*/
-#define GUI_DEFAULT_FONT          &GUI_Font6x8
+#if defined(__cplusplus)
+}
+#endif
 
-/*********************************************************************
-*
-*         Configuration of available packages
-*/
-#define GUI_SUPPORT_MOUSE             (0)    /* Support a mouse */
-#define GUI_WINSUPPORT                (0)    /* Use window manager */
-#define GUI_SUPPORT_MEMDEV            (1)    /* Memory device package available */
-#define GUI_SUPPORT_DEVICES           (1)    /* Enable use of device pointers */
+#endif /* GUIDRV_DIST_H */
 
-#endif  /* Avoid multiple inclusion */
+/*************************** End of file ****************************/

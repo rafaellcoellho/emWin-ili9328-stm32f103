@@ -27,9 +27,9 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : GUIConf.h
-Purpose     : Configures emWins abilities, fonts etc.
-----------------------------------------------------------------------
+File        : GUI_SPRITE_Private.h
+Purpose     : Private header file for sprites
+---------------------------END-OF-HEADER------------------------------
 */
 
 /**
@@ -42,55 +42,46 @@ Purpose     : Configures emWins abilities, fonts etc.
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
   */
-
-#ifndef GUICONF_H
-#define GUICONF_H
-
-/*********************************************************************
-*
-*       Multi layer/display support
-*/
-#define GUI_NUM_LAYERS            1    // Maximum number of available layers
+  
+#ifndef GUI_SPRITE_PRIVATE_H
+#define GUI_SPRITE_PRIVATE_H
 
 /*********************************************************************
 *
-*       Multi tasking support
+*       Defines
+*
+**********************************************************************
 */
-#ifdef OS_SUPPORT
- #define GUI_OS                    (1)  // Compile with multitasking support
-#else
- #define GUI_OS                    (0)
-#endif
+#define SPRITE_LOCK_H(h) (GUI_SPRITE_OBJ *)GUI_LOCK_H(h)
 
 /*********************************************************************
 *
-*       Configuration of touch support
-*/
-#ifndef   GUI_SUPPORT_TOUCH
-  #define GUI_SUPPORT_TOUCH       (1)  // Support touchscreen
-#endif
-
-/*********************************************************************
+*       Types
 *
-*       Default font
+**********************************************************************
 */
-#define GUI_DEFAULT_FONT          &GUI_Font6x8
+//
+// The sprite object
+//
+typedef struct {
+  GUI_DEVICE       * pDevice;
+  GUI_RECT           Rect;
+  GUI_HMEM           hColors;
+  U16                Flags;
+  const GUI_BITMAP * pBM;
+  void            (* pCB)(GUI_HSPRITE hSprite, int Cmd); // Callback routine for animated sprites
+  GUI_HMEM           hContext;
+} GUI_SPRITE_OBJ;
 
-/*********************************************************************
-*
-*         Configuration of available packages
-*/
-#define GUI_SUPPORT_MOUSE             (0)    /* Support a mouse */
-#define GUI_WINSUPPORT                (0)    /* Use window manager */
-#define GUI_SUPPORT_MEMDEV            (1)    /* Memory device package available */
-#define GUI_SUPPORT_DEVICES           (1)    /* Enable use of device pointers */
 
-#endif  /* Avoid multiple inclusion */
+#endif // GUI_SPRITE_PRIVATE_H
+
+/*************************** End of file ****************************/

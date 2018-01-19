@@ -27,9 +27,9 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : GUIConf.h
-Purpose     : Configures emWins abilities, fonts etc.
-----------------------------------------------------------------------
+File        : Dialog.h
+Purpose     : Dialog box include
+--------------------END-OF-HEADER-------------------------------------
 */
 
 /**
@@ -42,55 +42,79 @@ Purpose     : Configures emWins abilities, fonts etc.
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
   */
+  
+#ifndef DIALOG_INTERN_H
+#define DIALOG_INTERN_H
 
-#ifndef GUICONF_H
-#define GUICONF_H
+#include "WM.h"
 
-/*********************************************************************
-*
-*       Multi layer/display support
-*/
-#define GUI_NUM_LAYERS            1    // Maximum number of available layers
+#if GUI_WINSUPPORT
 
-/*********************************************************************
-*
-*       Multi tasking support
-*/
-#ifdef OS_SUPPORT
- #define GUI_OS                    (1)  // Compile with multitasking support
-#else
- #define GUI_OS                    (0)
+#if defined(__cplusplus)
+  extern "C" {        // Make sure we have C-declarations in C++ programs
 #endif
 
 /*********************************************************************
 *
-*       Configuration of touch support
+*       Types
+*
+**********************************************************************
 */
-#ifndef   GUI_SUPPORT_TOUCH
-  #define GUI_SUPPORT_TOUCH       (1)  // Support touchscreen
+typedef struct  GUI_WIDGET_CREATE_INFO_struct GUI_WIDGET_CREATE_INFO;
+typedef WM_HWIN GUI_WIDGET_CREATE_FUNC        (const GUI_WIDGET_CREATE_INFO * pCreate, WM_HWIN hWin, int x0, int y0, WM_CALLBACK * cb);
+
+/*********************************************************************
+*
+*       Structures
+*
+**********************************************************************
+*/
+struct GUI_WIDGET_CREATE_INFO_struct {
+  GUI_WIDGET_CREATE_FUNC * pfCreateIndirect;
+  const char             * pName;            // Text ... Not used on all widgets
+  I16                      Id;               // ID ... should be unique in a dialog
+  I16                      x0;               // x position
+  I16                      y0;               // y position
+  I16                      xSize;            // x size
+  I16                      ySize;            // y size
+  U16                      Flags;            // Widget specific create flags (opt.)
+  I32                      Para;             // Widget specific parameter (opt.)
+  U32                      NumExtraBytes;    // Number of extra bytes usable with <WIDGET>_SetUserData & <WIDGET>_GetUserData
+};
+
+/*********************************************************************
+*
+*       Public API functions
+*
+**********************************************************************
+*/
+WM_HWIN            GUI_CreateDialogBox   (const GUI_WIDGET_CREATE_INFO * paWidget, int NumWidgets, WM_CALLBACK * cb, WM_HWIN hParent, int x0, int y0);
+void               GUI_EndDialog         (WM_HWIN hWin, int r);
+int                GUI_ExecDialogBox     (const GUI_WIDGET_CREATE_INFO * paWidget, int NumWidgets, WM_CALLBACK * cb, WM_HWIN hParent, int x0, int y0);
+int                GUI_ExecCreatedDialog (WM_HWIN hDialog);
+WM_DIALOG_STATUS * GUI_GetDialogStatusPtr(WM_HWIN hDialog);                                    // Not to be documented
+void               GUI_SetDialogStatusPtr(WM_HWIN hDialog, WM_DIALOG_STATUS * pDialogStatus);  // Not to be documented
+
+/*********************************************************************
+*
+*       Obsolete
+*/
+LCD_COLOR          DIALOG_GetBkColor(void);
+LCD_COLOR          DIALOG_SetBkColor(LCD_COLOR BkColor);
+
+#if defined(__cplusplus)
+  }
 #endif
 
-/*********************************************************************
-*
-*       Default font
-*/
-#define GUI_DEFAULT_FONT          &GUI_Font6x8
+#endif  // GUI_WINSUPPORT
+#endif  // DIALOG_INTERN_H
 
-/*********************************************************************
-*
-*         Configuration of available packages
-*/
-#define GUI_SUPPORT_MOUSE             (0)    /* Support a mouse */
-#define GUI_WINSUPPORT                (0)    /* Use window manager */
-#define GUI_SUPPORT_MEMDEV            (1)    /* Memory device package available */
-#define GUI_SUPPORT_DEVICES           (1)    /* Enable use of device pointers */
-
-#endif  /* Avoid multiple inclusion */
+/*************************** End of file ****************************/

@@ -27,9 +27,9 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : GUIConf.h
-Purpose     : Configures emWins abilities, fonts etc.
-----------------------------------------------------------------------
+File        : GUI_ARRAY.h
+Purpose     : Array handling routines
+---------------------------END-OF-HEADER------------------------------
 */
 
 /**
@@ -42,55 +42,49 @@ Purpose     : Configures emWins abilities, fonts etc.
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
   */
+  
+#ifndef GUI_ARRAY_H
+#define GUI_ARRAY_H
 
-#ifndef GUICONF_H
-#define GUICONF_H
+#include "WM_Intern.h"
 
-/*********************************************************************
-*
-*       Multi layer/display support
-*/
-#define GUI_NUM_LAYERS            1    // Maximum number of available layers
+#if GUI_WINSUPPORT
 
 /*********************************************************************
 *
-*       Multi tasking support
+*       Public types
+*
+**********************************************************************
 */
-#ifdef OS_SUPPORT
- #define GUI_OS                    (1)  // Compile with multitasking support
-#else
- #define GUI_OS                    (0)
-#endif
+typedef WM_HMEM GUI_ARRAY;
 
 /*********************************************************************
 *
-*       Configuration of touch support
-*/
-#ifndef   GUI_SUPPORT_TOUCH
-  #define GUI_SUPPORT_TOUCH       (1)  // Support touchscreen
-#endif
-
-/*********************************************************************
+*       Public functions
 *
-*       Default font
+**********************************************************************
 */
-#define GUI_DEFAULT_FONT          &GUI_Font6x8
+GUI_ARRAY GUI_ARRAY_Create          (void);
+int       GUI_ARRAY_AddItem         (GUI_ARRAY hArray, const void * pNew, int Len);
+void      GUI_ARRAY_Delete          (GUI_ARRAY hArray);
+WM_HMEM   GUI_ARRAY_GethItem        (GUI_ARRAY hArray, unsigned int Index);
+unsigned  GUI_ARRAY_GetNumItems     (GUI_ARRAY hArray);
+void    * GUI_ARRAY_GetpItemLocked  (GUI_ARRAY hArray, unsigned int Index);
+int       GUI_ARRAY_SethItem        (GUI_ARRAY hArray, unsigned int Index, WM_HMEM hItem);
+WM_HMEM   GUI_ARRAY_SetItem         (GUI_ARRAY hArray, unsigned int Index, const void * pData, int Len);
+void      GUI_ARRAY_DeleteItem      (GUI_ARRAY hArray, unsigned int Index);
+char      GUI_ARRAY_InsertBlankItem (GUI_ARRAY hArray, unsigned int Index);
+WM_HMEM   GUI_ARRAY_InsertItem      (GUI_ARRAY hArray, unsigned int Index, int Len);
+void    * GUI_ARRAY_ResizeItemLocked(GUI_ARRAY hArray, unsigned int Index, int Len);
 
-/*********************************************************************
-*
-*         Configuration of available packages
-*/
-#define GUI_SUPPORT_MOUSE             (0)    /* Support a mouse */
-#define GUI_WINSUPPORT                (0)    /* Use window manager */
-#define GUI_SUPPORT_MEMDEV            (1)    /* Memory device package available */
-#define GUI_SUPPORT_DEVICES           (1)    /* Enable use of device pointers */
+#endif /* GUI_WINSUPPORT */
 
-#endif  /* Avoid multiple inclusion */
+#endif /* GUI_ARRAY_H */

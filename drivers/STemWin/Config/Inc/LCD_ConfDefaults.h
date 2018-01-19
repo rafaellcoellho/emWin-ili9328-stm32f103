@@ -27,8 +27,8 @@ Full source code is available at: www.segger.com
 
 We appreciate your understanding and fairness.
 ----------------------------------------------------------------------
-File        : GUIConf.h
-Purpose     : Configures emWins abilities, fonts etc.
+File        : LCD_ConfDefaults.h
+Purpose     : Valid LCD configuration and defaults
 ----------------------------------------------------------------------
 */
 
@@ -42,55 +42,52 @@ Purpose     : Configures emWins abilities, fonts etc.
   *
   *        http://www.st.com/software_license_agreement_liberty_v2
   *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
+  * Unless required by applicable law or agreed to in writing, software 
+  * distributed under the License is distributed on an "AS IS" BASIS, 
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   * See the License for the specific language governing permissions and
   * limitations under the License.
   *
   ******************************************************************************
   */
+  
+#ifndef LCD_CONFIG_DEFAULTS_H
+#define LCD_CONFIG_DEFAULTS_H
 
-#ifndef GUICONF_H
-#define GUICONF_H
+#include "LCDConf.h"            /* Configuration header file */
 
-/*********************************************************************
+/**********************************************************
 *
-*       Multi layer/display support
+*       Configuration defaults
 */
-#define GUI_NUM_LAYERS            1    // Maximum number of available layers
-
-/*********************************************************************
-*
-*       Multi tasking support
-*/
-#ifdef OS_SUPPORT
- #define GUI_OS                    (1)  // Compile with multitasking support
-#else
- #define GUI_OS                    (0)
+#ifndef   LCD_MIRROR_X
+  #define LCD_MIRROR_X 0
+#endif
+#ifndef   LCD_MIRROR_Y
+  #define LCD_MIRROR_Y 0
+#endif
+#ifndef   LCD_SWAP_XY
+  #define LCD_SWAP_XY 0
+#endif
+#ifndef   LCD_FIRSTCOM0
+  #define LCD_FIRSTCOM0 0
+#endif
+#ifndef   LCD_FIRSTSEG0
+  #define LCD_FIRSTSEG0 0
+#endif
+#ifndef   LCD_SWAP_RB
+  #define LCD_SWAP_RB 0
+#endif
+#ifndef   LCD_DISPLAY_INDEX
+  #define LCD_DISPLAY_INDEX 0
+#endif
+#ifndef   LCD_ENDIAN_BIG
+  #define LCD_ENDIAN_BIG 0
+#endif
+#ifndef   LCD_ALLOW_NON_OPTIMIZED_MODE
+  #define LCD_ALLOW_NON_OPTIMIZED_MODE 1
 #endif
 
-/*********************************************************************
-*
-*       Configuration of touch support
-*/
-#ifndef   GUI_SUPPORT_TOUCH
-  #define GUI_SUPPORT_TOUCH       (1)  // Support touchscreen
-#endif
+#endif /* LCD_CONFIG_DEFAULTS_H */
 
-/*********************************************************************
-*
-*       Default font
-*/
-#define GUI_DEFAULT_FONT          &GUI_Font6x8
-
-/*********************************************************************
-*
-*         Configuration of available packages
-*/
-#define GUI_SUPPORT_MOUSE             (0)    /* Support a mouse */
-#define GUI_WINSUPPORT                (0)    /* Use window manager */
-#define GUI_SUPPORT_MEMDEV            (1)    /* Memory device package available */
-#define GUI_SUPPORT_DEVICES           (1)    /* Enable use of device pointers */
-
-#endif  /* Avoid multiple inclusion */
+/*************************** End of file ****************************/
