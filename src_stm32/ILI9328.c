@@ -2,249 +2,147 @@
 #include "stm32f1xx_hal.h"
 #include "ILI9328.h"
 
-/*
- * Anotação:
- * DB0...DB7 -> PIN0...PIN7
- * RESET -> PIN12
- * CS -> PIN11
- * RS -> PIN10
- * WR -> PIN9
- * RD -> PIN8
- */
-
-static void ILI9328_InitIO(void)
-{
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-
+static inline void setIoOutput(void){
 	GPIOA->CRL = GPIO_CRL_MODE0_0|GPIO_CRL_MODE1_0|GPIO_CRL_MODE2_0
 		|GPIO_CRL_MODE3_0|GPIO_CRL_MODE4_0|GPIO_CRL_MODE5_0
 		|GPIO_CRL_MODE6_0|GPIO_CRL_MODE7_0;
+}
 
-	GPIOA->CRH = GPIO_CRH_MODE8_0|GPIO_CRH_MODE9_0|GPIO_CRH_MODE10_0
-		|GPIO_CRH_MODE11_0|GPIO_CRH_MODE12_0;
+static inline void setIoInput(void){
+	GPIOA->CRL = GPIO_CRL_CNF7_0|GPIO_CRL_CNF6_0|GPIO_CRL_CNF5_0|
+		GPIO_CRL_CNF4_0|GPIO_CRL_CNF3_0|GPIO_CRL_CNF2_0|
+		GPIO_CRL_CNF1_0|GPIO_CRL_CNF0_0;
+}
 
+static void initIo(void)
+{
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	setIoOutput();
+	GPIOA->CRH = RD_MODE_GLCD|WR_MODE_GLCD|RS_MODE_GLCD
+		|CS_MODE_GLCD|RESET_MODE_GLCD;
 	GPIOA->ODR &= 0xE000;
 }
 
-static void ILI9328_Reset(void)
+static void reset(void)
 {
-	GPIOA->ODR |= GPIO_ODR_ODR12; //RESET
+	GPIOA->ODR |= RESET_GLCD; //RESET
 	HAL_Delay(100);
-	GPIOA->ODR &= ~GPIO_ODR_ODR12; //RESET
+	GPIOA->ODR &= ~RESET_GLCD; //RESET
 	HAL_Delay(500);
-	GPIOA->ODR |= GPIO_ODR_ODR12; //RESET
+	GPIOA->ODR |= RESET_GLCD; //RESET
 	HAL_Delay(500);
+}
+
+static void writeIndexRegister(uint8_t adressRegister)
+{
+	ILI9328_WriteRS0(0x00);
+	ILI9328_WriteRS0(adressRegister);
+}
+
+static void writeValueInRegister(uint16_t value)
+{
+	ILI9328_WriteRS1(value >> 8);
+	ILI9328_WriteRS1(value);
+}
+
+static void writeRegister(uint8_t adressRegister, uint16_t value)
+{
+	writeIndexRegister(adressRegister);
+	writeValueInRegister(value);
 }
 
 void ILI9328_Init(void)
 {
-	ILI9328_InitIO();
-	ILI9328_Reset();
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0xE5);
-	ILI9328_WriteRS1(0x78); ILI9328_WriteRS1(0xF0);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x01);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x02);
-	ILI9328_WriteRS1(0x04); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x03);
-	ILI9328_WriteRS1(0x10); ILI9328_WriteRS1(0x90);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x04);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x08);
-	ILI9328_WriteRS1(0x02); ILI9328_WriteRS1(0x02);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x09);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x0A);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x0C);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x0D);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x0F);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	/*----------------------------------------------*/
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x10);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x11);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x07);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x12);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x13);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x07);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x01);
-
+	initIo();
+	reset();
+	writeRegister(0xE5, 0x78F0);
+	writeRegister(0x01, 0x0000);
+	writeRegister(0x02, 0x0400);
+	writeRegister(0x03, 0x1090);
+	writeRegister(0x04, 0x0000);
+	writeRegister(0x08, 0x0202);
+	writeRegister(0x09, 0x0000);
+	writeRegister(0x0A, 0x0000);
+	writeRegister(0x0C, 0x0000);
+	writeRegister(0x0D, 0x0000);
+	writeRegister(0x0F, 0x0000);
+	writeRegister(0x10, 0x0000);
+	writeRegister(0x11, 0x0007);
+	writeRegister(0x12, 0x0000);
+	writeRegister(0x13, 0x0000);
+	writeRegister(0x07, 0x0001);
 	HAL_Delay(200);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x10);
-	ILI9328_WriteRS1(0x16); ILI9328_WriteRS1(0x90);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x11);
-	ILI9328_WriteRS1(0x02); ILI9328_WriteRS1(0x27);
-
+	writeRegister(0x10, 0x1690);
+	writeRegister(0x11, 0x0227);
 	HAL_Delay(50);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x12);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x8C);
-
+	writeRegister(0x12, 0x008C);
 	HAL_Delay(50);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x13);
-	ILI9328_WriteRS1(0x15); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x29);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x04);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x2B);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x0D);
-
+	writeRegister(0x13, 0x1500);
+	writeRegister(0x29, 0x0004);
+	writeRegister(0x2B, 0x000D);
 	HAL_Delay(50);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x20);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x21);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	/*----------------------------------------------*/
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x30);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x31);
-	ILI9328_WriteRS1(0x06); ILI9328_WriteRS1(0x07);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x32);
-	ILI9328_WriteRS1(0x03); ILI9328_WriteRS1(0x05);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x35);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x36);
-	ILI9328_WriteRS1(0x16); ILI9328_WriteRS1(0x04);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x37);
-	ILI9328_WriteRS1(0x02); ILI9328_WriteRS1(0x04);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x38);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x01);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x39);
-	ILI9328_WriteRS1(0x07); ILI9328_WriteRS1(0x07);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x3C);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x3D);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x0F);
-
-	/*----------------------------------------------*/
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x50);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x51);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0xEF);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x52);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x53);
-	ILI9328_WriteRS1(0x01); ILI9328_WriteRS1(0x3F);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x60);
-	ILI9328_WriteRS1(0xA7); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x61);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x01);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x6A);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x80);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x81);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x82);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x83);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x84);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x85);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x90);
-	ILI9328_WriteRS1(0x00); ILI9328_WriteRS1(0x10);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x92);
-	ILI9328_WriteRS1(0x06); ILI9328_WriteRS1(0x00);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x07);
-	ILI9328_WriteRS1(0x01); ILI9328_WriteRS1(0x33);
-
-	HAL_Delay(50);
+	writeRegister(0x20, 0x0000);
+	writeRegister(0x21, 0x0000);
+	writeRegister(0x30, 0x0000);
+	writeRegister(0x31, 0x0607);
+	writeRegister(0x32, 0x0305);
+	writeRegister(0x35, 0x0000);
+	writeRegister(0x36, 0x1604);
+	writeRegister(0x37, 0x0204);
+	writeRegister(0x38, 0x0001);
+	writeRegister(0x39, 0x0707);
+	writeRegister(0x3C, 0x0000);
+	writeRegister(0x3D, 0x000F);
+	writeRegister(0x50, 0x0000);
+	writeRegister(0x51, 0x00EF);
+	writeRegister(0x52, 0x0000);
+	writeRegister(0x53, 0x013F);
+	writeRegister(0x60, 0xA700);
+	writeRegister(0x61, 0x0001);
+	writeRegister(0x6A, 0x0000);
+	writeRegister(0x80, 0x0000);
+	writeRegister(0x81, 0x0000);
+	writeRegister(0x82, 0x0000);
+	writeRegister(0x83, 0x0000);
+	writeRegister(0x84, 0x0000);
+	writeRegister(0x85, 0x0000);
+	writeRegister(0x90, 0x0010);
+	writeRegister(0x92, 0x0600);
+	writeRegister(0x07, 0x0133);
 }
 
 void ILI9328_WriteRS0(uint8_t data)
 {
-	GPIOA->CRL = GPIO_CRL_MODE0_0|GPIO_CRL_MODE1_0|GPIO_CRL_MODE2_0
-		|GPIO_CRL_MODE3_0|GPIO_CRL_MODE4_0|GPIO_CRL_MODE5_0
-		|GPIO_CRL_MODE6_0|GPIO_CRL_MODE7_0;
-
-	GPIOA->ODR |= GPIO_ODR_ODR8;// RD
-	GPIOA->ODR |= GPIO_ODR_ODR9;// WR
-	GPIOA->ODR &= ~GPIO_ODR_ODR10;// RS - A0
+	setIoOutput();
+	GPIOA->ODR |= RD_GLCD;
+	GPIOA->ODR |= WR_GLCD;
+	GPIOA->ODR &= ~RS_GLCD;
 
 	GPIOA->ODR &= 0xFF00;
 	GPIOA->ODR |= ((uint16_t)data & 0x00FF);
 
-	GPIOA->ODR &= ~GPIO_ODR_ODR9; // WR
+	GPIOA->ODR &= ~WR_GLCD;
 	HAL_Delay(1);
-	GPIOA->ODR |= GPIO_ODR_ODR9; // WR
+	GPIOA->ODR |= WR_GLCD;
 	HAL_Delay(1);
 
-	GPIOA->ODR |= GPIO_ODR_ODR10;// RS - A0
+	GPIOA->ODR |= RS_GLCD;
 }
 
 void ILI9328_WriteRS1(uint8_t data)
 {
-	GPIOA->CRL = GPIO_CRL_MODE0_0|GPIO_CRL_MODE1_0|GPIO_CRL_MODE2_0
-		|GPIO_CRL_MODE3_0|GPIO_CRL_MODE4_0|GPIO_CRL_MODE5_0
-		|GPIO_CRL_MODE6_0|GPIO_CRL_MODE7_0;
+	setIoOutput();
 
-	GPIOA->ODR |= GPIO_ODR_ODR8;// RD
-	GPIOA->ODR |= GPIO_ODR_ODR9;// WR
-	GPIOA->ODR |= GPIO_ODR_ODR10;// RS - A0
+	GPIOA->ODR |= RD_GLCD;
+	GPIOA->ODR |= WR_GLCD;
+	GPIOA->ODR |= RS_GLCD;
 
 	GPIOA->ODR &= 0xFF00;
 	GPIOA->ODR |= ((uint16_t)data & 0x00FF);
 
-	GPIOA->ODR &= ~GPIO_ODR_ODR9; // WR
+	GPIOA->ODR &= ~WR_GLCD;
 	HAL_Delay(1);
-	GPIOA->ODR |= GPIO_ODR_ODR9; // WR
+	GPIOA->ODR |= WR_GLCD;
 	HAL_Delay(1);
 }
 
@@ -256,20 +154,18 @@ void ILI9328_MultiWriteRS1(uint8_t *p_data, int numItems)
 
 uint8_t ILI9328_ReadRS1(void)
 {
-	GPIOA->CRL = GPIO_CRL_CNF7_0|GPIO_CRL_CNF6_0|GPIO_CRL_CNF5_0|
-		GPIO_CRL_CNF4_0|GPIO_CRL_CNF3_0|GPIO_CRL_CNF2_0|
-		GPIO_CRL_CNF1_0|GPIO_CRL_CNF0_0;
+	setIoInput();
 
 	uint8_t data = 0x00;
 
-	GPIOA->ODR &= ~GPIO_ODR_ODR8;// RD
-	GPIOA->ODR |= GPIO_ODR_ODR9;// WR
-	GPIOA->ODR |= GPIO_ODR_ODR10;// RS - A0
+	GPIOA->ODR &= ~RD_GLCD;
+	GPIOA->ODR |= WR_GLCD;
+	GPIOA->ODR |= RS_GLCD;
 
 	HAL_Delay(1);
 	data = (uint8_t)GPIOA->IDR & 0xFF;
-	GPIOA->ODR |= GPIO_ODR_ODR8;// RD
-	
+	GPIOA->ODR |= RD_GLCD;// RD
+
 	return data;
 }
 
