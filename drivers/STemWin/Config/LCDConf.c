@@ -95,12 +95,6 @@ Purpose     : Display controller configuration (single layer)
 
 /*********************************************************************
 *
-*       Public functions
-*
-**********************************************************************
-*/
-/*********************************************************************
-*
 *       LCD_X_Config
 *
 * Function description:
@@ -117,9 +111,14 @@ void LCD_X_Config(void) {
   //
   pDevice = GUI_DEVICE_CreateAndLink(GUIDRV_FLEXCOLOR, GUICC_565, 0, 0);
   //
+  // Display driver configuration, required for Lin-driver
+  //
+  LCD_SetSizeEx (0, 20, 80);
+  // LCD_SetVSizeEx(0, VXSIZE_PHYS, VYSIZE_PHYS);
+  //
   // Orientation
   //
-  Config.Orientation = GUI_SWAP_XY | GUI_MIRROR_Y;
+  Config.Orientation = GUI_SWAP_XY;
   GUIDRV_FlexColor_Config(pDevice, &Config);
   //
   // Set controller and operation mode
@@ -127,8 +126,8 @@ void LCD_X_Config(void) {
   PortAPI.pfWrite8_A0  = ILI9328_WriteRS0;
   PortAPI.pfWrite8_A1  = ILI9328_WriteRS1;
   PortAPI.pfWriteM8_A1 = ILI9328_MultiWriteRS1;
-  PortAPI.pfRead8_A1  = ILI9328_ReadRS1;
-  PortAPI.pfReadM8_A1 = ILI9328_MultiReadRS1;
+  PortAPI.pfRead8_A1 = ILI9328_ReadRS1;
+  PortAPI.pfReadM8_A1  = ILI9328_MultiReadRS1;
   GUIDRV_FlexColor_SetFunc(pDevice, &PortAPI, GUIDRV_FLEXCOLOR_F66708, GUIDRV_FLEXCOLOR_M16C0B8);
 }
 
