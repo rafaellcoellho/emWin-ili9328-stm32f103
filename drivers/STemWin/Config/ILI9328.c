@@ -174,23 +174,3 @@ void ILI9328_MultiReadRS1(uint8_t *p_data, int numItems)
 	for (int i = 0; i < numItems; i++)
 		p_data[i] = ILI9328_ReadRS1();
 }
-
-void ILI9328_Test()
-{
-	uint8_t msb, lsb;
-
-	writeRegister(0x50, 0x0000);
-	writeRegister(0x51, 0x0032);
-	writeRegister(0x52, 0x0000);
-	writeRegister(0x53, 0x0032);
-	writeRegister(0x20, 0x0000);
-	writeRegister(0x21, 0x0000);
-
-	ILI9328_WriteRS0(0x00); ILI9328_WriteRS0(0x021);
-	msb = ILI9328_ReadRS1();
-	lsb = ILI9328_ReadRS1();
-
-	writeIndexRegister(0x22);
-	for(int i = 0; i < 2500; i++)
-		writeValueInRegister(0x0000);
-}
