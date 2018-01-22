@@ -123,7 +123,7 @@ C_INCLUDES =  \
 -Idrivers/CMSIS/Device/ST/STM32F1xx/Include \
 -Idrivers/CMSIS/Include \
 -Idrivers/STemWin/Config \
--Idrivers/STemWin/Config/Inc
+-Idrivers/STemWin/inc
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
