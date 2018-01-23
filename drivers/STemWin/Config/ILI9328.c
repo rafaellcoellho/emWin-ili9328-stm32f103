@@ -26,11 +26,11 @@ static void initIo(void)
 static void reset(void)
 {
 	GPIOA->ODR |= RESET_GLCD;
-	HAL_Delay(100);
+	HAL_Delay(50);
 	GPIOA->ODR &= ~RESET_GLCD;
-	HAL_Delay(500);
+	HAL_Delay(50);
 	GPIOA->ODR |= RESET_GLCD;
-	HAL_Delay(500);
+	HAL_Delay(10);
 }
 
 static void writeIndexRegister(uint8_t adressRegister)
@@ -51,64 +51,51 @@ static void writeRegister(uint8_t adressRegister, uint16_t value)
 	writeValueInRegister(value);
 }
 
+static void configPowerControl(void)
+{
+	writeRegister(POWER_CONTROL_1, 0x0000);
+	writeRegister(POWER_CONTROL_2, 0x0007);
+	writeRegister(POWER_CONTROL_3, 0x0000);
+	writeRegister(POWER_CONTROL_4, 0x0000);
+	writeRegister(DISPLAY_CONTROL_1, 0x0001);
+	HAL_Delay(200);
+	writeRegister(POWER_CONTROL_1, 0x1690);
+	writeRegister(POWER_CONTROL_2, 0x0227);
+	HAL_Delay(50);
+	writeRegister(POWER_CONTROL_3, 0x008C);
+	HAL_Delay(50);
+	writeRegister(POWER_CONTROL_4, 0x1500);
+	writeRegister(POWER_CONTROL_7, 0x0004);
+}
+
+static void configFrameRateAndColorControl(void)
+{
+	writeRegister(FRAME_RATE_AND_COLOR_CONTROL, 0x000D);
+	HAL_Delay(50);
+}
+
+static void configGateScanControl(void)
+{
+	writeRegister(DRIVER_OUTPUT_CONTROL_2, 0xA700);
+	writeRegister(BASE_IMAGEDISPLAY_CONTROL, 0x0001);
+	writeRegister(VERTICAL_SCHOLL_CONTROL, 0x0000);
+}
+
+static void configPanelInterfaceControl(void)
+{
+	writeRegister(PANEL_INTERFACE_CONTROL_1, 0x0010);
+	writeRegister(PANEL_INTERFACE_CONTROL_2, 0x0600);
+}
+
 void ILI9328_Init(void)
 {
 	initIo();
 	reset();
-	writeRegister(0xE5, 0x78F0);
-	writeRegister(0x01, 0x0000);
-	writeRegister(0x02, 0x0400);
-	writeRegister(0x03, 0x1090);
-	writeRegister(0x04, 0x0000);
-	writeRegister(0x08, 0x0202);
-	writeRegister(0x09, 0x0000);
-	writeRegister(0x0A, 0x0000);
-	writeRegister(0x0C, 0x0000);
-	writeRegister(0x0D, 0x0000);
-	writeRegister(0x0F, 0x0000);
-	writeRegister(0x10, 0x0000);
-	writeRegister(0x11, 0x0007);
-	writeRegister(0x12, 0x0000);
-	writeRegister(0x13, 0x0000);
-	writeRegister(0x07, 0x0001);
-	HAL_Delay(200);
-	writeRegister(0x10, 0x1690);
-	writeRegister(0x11, 0x0227);
-	HAL_Delay(50);
-	writeRegister(0x12, 0x008C);
-	HAL_Delay(50);
-	writeRegister(0x13, 0x1500);
-	writeRegister(0x29, 0x0004);
-	writeRegister(0x2B, 0x000D);
-	HAL_Delay(50);
-	writeRegister(0x20, 0x0000);
-	writeRegister(0x21, 0x0000);
-	writeRegister(0x30, 0x0000);
-	writeRegister(0x31, 0x0607);
-	writeRegister(0x32, 0x0305);
-	writeRegister(0x35, 0x0000);
-	writeRegister(0x36, 0x1604);
-	writeRegister(0x37, 0x0204);
-	writeRegister(0x38, 0x0001);
-	writeRegister(0x39, 0x0707);
-	writeRegister(0x3C, 0x0000);
-	writeRegister(0x3D, 0x000F);
-	writeRegister(0x50, 0x0000);
-	writeRegister(0x51, 0x00EF);
-	writeRegister(0x52, 0x0000);
-	writeRegister(0x53, 0x013F);
-	writeRegister(0x60, 0xA700);
-	writeRegister(0x61, 0x0001);
-	writeRegister(0x6A, 0x0000);
-	writeRegister(0x80, 0x0000);
-	writeRegister(0x81, 0x0000);
-	writeRegister(0x82, 0x0000);
-	writeRegister(0x83, 0x0000);
-	writeRegister(0x84, 0x0000);
-	writeRegister(0x85, 0x0000);
-	writeRegister(0x90, 0x0010);
-	writeRegister(0x92, 0x0600);
-	writeRegister(0x07, 0x0133);
+	configPowerControl();
+	configFrameRateAndColorControl();
+	configGateScanControl();
+	configPanelInterfaceControl();
+	writeRegister(DISPLAY_CONTROL_1, 0x0133);
 }
 
 void ILI9328_WriteRS0(uint8_t data)
