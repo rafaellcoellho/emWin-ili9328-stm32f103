@@ -25,11 +25,11 @@ static void initIo(void)
 
 static void reset(void)
 {
-	GPIOA->ODR |= RESET_GLCD; //RESET
+	GPIOA->ODR |= RESET_GLCD;
 	HAL_Delay(100);
-	GPIOA->ODR &= ~RESET_GLCD; //RESET
+	GPIOA->ODR &= ~RESET_GLCD;
 	HAL_Delay(500);
-	GPIOA->ODR |= RESET_GLCD; //RESET
+	GPIOA->ODR |= RESET_GLCD;
 	HAL_Delay(500);
 }
 
@@ -164,7 +164,7 @@ uint8_t ILI9328_ReadRS1(void)
 
 	HAL_Delay(1);
 	data = (uint8_t)GPIOA->IDR & 0xFF;
-	GPIOA->ODR |= RD_GLCD;// RD
+	GPIOA->ODR |= RD_GLCD;
 
 	return data;
 }
