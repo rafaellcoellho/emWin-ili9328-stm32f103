@@ -109,9 +109,7 @@ void ILI9328_WriteRS0(uint8_t data)
 	GPIOA->ODR |= ((uint16_t)data & 0x00FF);
 
 	GPIOA->ODR &= ~WR_GLCD;
-	HAL_Delay(1);
 	GPIOA->ODR |= WR_GLCD;
-	HAL_Delay(1);
 
 	GPIOA->ODR |= RS_GLCD;
 }
@@ -128,9 +126,7 @@ void ILI9328_WriteRS1(uint8_t data)
 	GPIOA->ODR |= ((uint16_t)data & 0x00FF);
 
 	GPIOA->ODR &= ~WR_GLCD;
-	HAL_Delay(1);
 	GPIOA->ODR |= WR_GLCD;
-	HAL_Delay(1);
 }
 
 void ILI9328_MultiWriteRS1(uint8_t *p_data, int numItems)
