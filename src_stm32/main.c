@@ -2,7 +2,6 @@
 #include "main.h"
 #include "stm32f1xx_hal.h"
 #include "GUI.h"
-#include "ILI9328.h"
 
 /* Macros -------------------------------------------------------------------*/
 #define CALMDOWN_COMPILER
