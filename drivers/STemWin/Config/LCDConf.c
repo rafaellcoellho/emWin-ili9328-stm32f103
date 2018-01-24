@@ -113,7 +113,7 @@ void LCD_X_Config(void) {
   //
   // Display driver configuration, required for Lin-driver
   //
-  LCD_SetSizeEx (0, 20, 80);
+  LCD_SetSizeEx (0, XSIZE_PHYS, YSIZE_PHYS);
   // LCD_SetVSizeEx(0, VXSIZE_PHYS, VYSIZE_PHYS);
   //
   // Orientation
