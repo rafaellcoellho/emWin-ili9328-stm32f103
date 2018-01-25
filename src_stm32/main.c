@@ -29,8 +29,10 @@ int main(void)
 
 	__HAL_RCC_CRC_CLK_ENABLE();
 	GUI_Init();
-	GUI_DispStringAt("Hello world!", 5, 5);
-
+	GUI_SetColor(GUI_BLACK);
+	GUI_SetBkColor(GUI_WHITE);
+	GUI_Clear();
+	GUI_DispStringAt("Hello World!", 5, 5);
 
 /* Infinite loop-------------------------------------------------------------*/
 	while (1) {
