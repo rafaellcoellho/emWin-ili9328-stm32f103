@@ -8,6 +8,9 @@
 
 /* Private variables --------------------------------------------------------*/
 
+/* Images -------------------------------------------------------------------*/
+extern GUI_CONST_STORAGE GUI_BITMAP bmlabworks;
+
 /* Private function prototypes ----------------------------------------------*/
 static void SystemClock_Config(void);
 
@@ -32,7 +35,7 @@ int main(void)
 	GUI_SetColor(GUI_BLACK);
 	GUI_SetBkColor(GUI_WHITE);
 	GUI_Clear();
-	GUI_DispStringAt("Hello World!", 5, 5);
+	GUI_DrawBitmap(&bmlabworks, 30, 30);
 
 /* Infinite loop-------------------------------------------------------------*/
 	while (1) {
