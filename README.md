@@ -78,98 +78,72 @@ $ sudo apt-get install libusb-1.0 libusb-1.0.0-dev python-usb
 
 ## Usage
 
-The make tool tries to run all the scripts needed to build, test, and analyze
-the code.
+This repository is only a reference for projects with graphical interface using
+emWin. The important part is the way of writing the functions to fit any
+display to the library. The ILI9328.c and ILI9328.h files are the
+implementation of these functions for the display controller ili9328 and
+should be used as a reference.
 
+```C
+void ILI9328_Init(void);
+void ILI9328_WriteRS0(uint8_t data);
+void ILI9328_WriteRS1(uint8_t data);
+void ILI9328_MultiWriteRS1(uint8_t *p_data, int numItems);
+uint8_t ILI9328_ReadRS1(void);
+void ILI9328_MultiReadRS1(uint8_t *p_data, int numItems);
 ```
-make analysis       -> run checkpatch in src and src_stm32
-make tests          -> test plataform independent in src
-make tests_coverage -> run lcov
-make runnable       -> create the .elf .bin and .hex
-make clean          -> clean the proj
-make flash          -> flash the uC
-make erase          -> erase the uC
+
+The LCDConf.c file is what gets the pointers to the functions for ili9328.
+
+```C
+void LCD_X_Config(void) {
+  GUI_DEVICE *pDevice;
+  CONFIG_FLEXCOLOR Config = {0};
+  GUI_PORT_API PortAPI = {0};
+  //
+  // Set display driver and color conversion
+  //
+  pDevice = GUI_DEVICE_CreateAndLink(GUIDRV_FLEXCOLOR, GUICC_565, 0, 0);
+  //
+  // Display driver configuration, required for Lin-driver
+  //
+  LCD_SetSizeEx (0, XSIZE_PHYS, YSIZE_PHYS);
+  // LCD_SetVSizeEx(0, VXSIZE_PHYS, VYSIZE_PHYS);
+  //
+  // Orientation
+  //
+  Config.Orientation = GUI_SWAP_XY;
+  GUIDRV_FlexColor_Config(pDevice, &Config);
+  //
+  // Set controller and operation mode
+  //
+  PortAPI.pfWrite8_A0  = ILI9328_WriteRS0;
+  PortAPI.pfWrite8_A1  = ILI9328_WriteRS1;
+  PortAPI.pfWriteM8_A1 = ILI9328_MultiWriteRS1;
+  PortAPI.pfRead8_A1 = ILI9328_ReadRS1;
+  PortAPI.pfReadM8_A1  = ILI9328_MultiReadRS1;
+  GUIDRV_FlexColor_SetFunc(pDevice, &PortAPI, GUIDRV_FLEXCOLOR_F66708, GUIDRV_FLEXCOLOR_M16C0B8);
+}
 ```
 
-You need to change the TARGET variables in the MakeRunnable.mk and Makefile
-files to fit the name of your project.
+You must also include the makefile in the STMWINLIB variable.
 
-To add new files to the project, you must include them in the build script
-(MakeRunnable.mk file). If you include direct files in the src or src_stm32
-folders, go to the C_SOURCES variable and add the file name with the path to
-it at the end. Example:
-
-```makefile
-C_SOURCES:= \
-src_stm32/main.c \
+```shell
+STEMWINLIBPATH= drivers/STemWin
 [...]
-src/helloWorld.c # <- New file to compile with the proj
-```
-
-If you want to create a folder to separate the files from the others, you must
-not only change the C_SOURCES, but also SOURCES_DIR and C_INCLUDES with the
-path.
-
-Considering that I have placed the helloWorld.c and helloWorld.h files in
-src/hello/, we need to make the following changes:
-
-```makefile
-SOURCES_DIR:=  \
-src_stm32 \
+STMWINLIB = $(STEMWINLIBPATH)/STemWin532_CM3_GCC.a
 [...]
-src/hello
+$(TARGET).elf: $(OBJECTS)
+	$(CC) $(OBJECTS) $(STMWINLIB) $(LDFLAGS) -o $@
+	$(SZ) $@
 ```
-
-```makefile
-C_SOURCES:= \
-src_stm32/main.c \
-[...]
-src/hello/helloWorld.c
-```
-
-```makefile
-C_INCLUDES =  \
--Isrc_stm32 \
-[...]
--Isrc/hello
-```
-
-Making those changes unnecessary is an improvement for the future.
-
-To upload without having to remove the st-link v2 from the USB port, you only
-need to press the reset button on the board and erase all memory:
-
-```
-Press reset button
-
-$ make erase
-
-st-flash erase
-st-flash 1.4.0
-2018-01-12T14:00:53 INFO src/common.c: Loading device parameters....
-2018-01-12T14:00:53 INFO src/common.c: Device connected is: F1 Medium-density
-device, id 0x20036410
-2018-01-12T14:00:53 INFO src/common.c: SRAM size: 0x5000 bytes (20 KiB), Flash:
- 0x20000 bytes (128 KiB) in pages of 1024 bytes
-
-$ make flash
-
-st-flash write blink_led.bin 0x8000000
-st-flash 1.4.0
-2018-01-12T14:00:58 INFO src/common.c: Loading device parameters....
-2018-01-12T14:00:58 INFO src/common.c: Device connected is: F1 Medium-density device, id 0x20036410
-2018-01-12T14:00:58 INFO src/common.c: SRAM size: 0x5000 bytes (20 KiB), Flash: 0x20000 bytes (128 KiB) in pages of 1024 bytes
-2018-01-12T14:00:58 INFO src/common.c: Attempting to write 4804 (0x12c4) bytes to stm32 address: 134217728 (0x8000000)
-Flash page at addr: 0x08001000 erased
-2018-01-12T14:00:58 INFO src/common.c: Finished erasing 5 pages of 1024 (0x400) bytes
-2018-01-12T14:00:58 INFO src/common.c: Starting Flash write for VL/F0/F3/F1_XL core id
-2018-01-12T14:00:58 INFO src/flash_loader.c: Successfully loaded flash loader in sram
-  5/5 pages written
-2018-01-12T14:00:59 INFO src/common.c: Starting verification of write complete
-2018-01-12T14:00:59 INFO src/common.c: Flash written and verified! jolly good!
-```
-
 
 ## Authors
 
 * **Rafael Coelho** - [rafaellcoellho](https://github.com/rafaellcoellho)
+
+## License
+
+This repository contains the full version of STemWin contained in STM32CubeF1
+v1.6.0. It is on the terms of the cleared license
+[here](http://www.st.com/content/st_com/en/products/embedded-software/mcus-embedded-software/stm32-embedded-software/stm32cube-mcu-packages/stm32cubef1.html).
