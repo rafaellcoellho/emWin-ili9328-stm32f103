@@ -1,7 +1,7 @@
 # Hello World with emWin display using ILI9328 controller and STM32f103C8
 
 An example project to start developing with the graphic library provided by
-STM32F1Cube, SEGGER emWin. Using 2.4 "TFT LCD SHiELD with ILI9325 Controller.
+STM32F1Cube, SEGGER emWin. Using 2.4 "TFT LCD SHiELD with ILI9328 Controller.
 
 ## Prerequisites
 
