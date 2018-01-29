@@ -7,12 +7,12 @@ STM32F1Cube, SEGGER emWin. Using 2.4 "TFT LCD SHIELD with ILI9328 Controller.
 
 The display:
 
-![alt text](https://github.com/rafaellcoellho/emWin-ili9328-stm32f103/blob/master/docs/display.jpg "display")
+![disp](https://github.com/rafaellcoellho/emWin-ili9328-stm32f103/blob/master/docs/display.jpg "display")
 
 
 The wiring diagram with the microcontroller:
 
-![alt text](https://github.com/rafaellcoellho/emWin-ili9328-stm32f103/blob/master/docs/sch.png "sch")
+![sch](https://github.com/rafaellcoellho/emWin-ili9328-stm32f103/blob/master/docs/sch.png "sch")
 
 ## Prerequisites
 
@@ -137,6 +137,10 @@ $(TARGET).elf: $(OBJECTS)
 	$(CC) $(OBJECTS) $(STMWINLIB) $(LDFLAGS) -o $@
 	$(SZ) $@
 ```
+
+When testing this program, it is expected to appear:
+
+![hello](https://github.com/rafaellcoellho/emWin-ili9328-stm32f103/blob/master/docs/P_20180129_111951.jpg "hello world")
 
 ## Authors
 
