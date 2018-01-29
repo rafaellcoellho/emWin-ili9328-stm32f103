@@ -8,9 +8,6 @@
 
 /* Private variables --------------------------------------------------------*/
 
-/* Images -------------------------------------------------------------------*/
-extern GUI_CONST_STORAGE GUI_BITMAP bmlabworks;
-
 /* Private function prototypes ----------------------------------------------*/
 static void SystemClock_Config(void);
 
@@ -35,7 +32,7 @@ int main(void)
 	GUI_SetColor(GUI_BLACK);
 	GUI_SetBkColor(GUI_WHITE);
 	GUI_Clear();
-	GUI_DrawBitmap(&bmlabworks, 30, 30);
+	GUI_DispStringAt("Hello world!",100, 100);
 
 /* Infinite loop-------------------------------------------------------------*/
 	while (1) {
@@ -49,8 +46,7 @@ static void SystemClock_Config(void)
 	RCC_OscInitTypeDef RCC_OscInitStruct;
 	RCC_ClkInitTypeDef RCC_ClkInitStruct;
 
-	/**Initializes the CPU, AHB and APB busses clocks
-	*/
+	/* Initializes the CPU, AHB and APB busses clocks */
 	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
 	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
 	RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
@@ -61,10 +57,9 @@ static void SystemClock_Config(void)
 	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
 		_Error_Handler(__FILE__, __LINE__);
 
-	/**Initializes the CPU, AHB and APB busses clocks
-	*/
+	/* Initializes the CPU, AHB and APB busses clocks */
 	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-	                      |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+		|RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
 	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
 	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
@@ -73,12 +68,10 @@ static void SystemClock_Config(void)
 	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
 		_Error_Handler(__FILE__, __LINE__);
 
-	/**Configure the Systick interrupt time
-	*/
+	/* Configure the Systick interrupt time */
 	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
 
-	/**Configure the Systick
-	*/
+	/* Configure the Systick */
 	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
 	/* SysTick_IRQn interrupt configuration */
