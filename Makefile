@@ -5,6 +5,9 @@ all: tests runnable
 analysis:
 	make -f MakeAnalysis.mk V=${V} all
 
+code_beautifier:
+	make -f MakeBeautifier.mk V=${V} all
+
 runnable:
 	make -f MakeRunnable.mk V=${V} all
 
