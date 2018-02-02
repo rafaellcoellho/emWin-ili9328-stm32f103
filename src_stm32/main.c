@@ -32,7 +32,7 @@ int main(void)
 	GUI_SetColor(GUI_BLACK);
 	GUI_SetBkColor(GUI_WHITE);
 	GUI_Clear();
-	GUI_DispStringAt("Hello world!",100, 100);
+	GUI_DispStringAt("Hello world!", 100, 100);
 
 /* Infinite loop-------------------------------------------------------------*/
 	while (1) {
@@ -58,8 +58,8 @@ static void SystemClock_Config(void)
 		_Error_Handler(__FILE__, __LINE__);
 
 	/* Initializes the CPU, AHB and APB busses clocks */
-	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-		|RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+				      | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
 	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
@@ -69,7 +69,7 @@ static void SystemClock_Config(void)
 		_Error_Handler(__FILE__, __LINE__);
 
 	/* Configure the Systick interrupt time */
-	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+	HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq() / 1000);
 
 	/* Configure the Systick */
 	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);

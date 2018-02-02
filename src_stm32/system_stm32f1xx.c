@@ -119,19 +119,20 @@
  */
 
 /*****************************************************************************
- *  Clock Definitions
- *****************************************************************************/
+*  Clock Definitions
+*****************************************************************************/
 #if defined(STM32F100xB) || defined(STM32F100xE)
 /*!< System Clock Frequency (Core Clock) */
-uint32_t SystemCoreClock         = 24000000U;
+uint32_t SystemCoreClock = 24000000U;
 #else /*!< HSI Selected as System Clock source */
- /*!< System Clock Frequency (Core Clock) */
-uint32_t SystemCoreClock         = 72000000U;
+/*!< System Clock Frequency (Core Clock) */
+uint32_t SystemCoreClock = 72000000U;
 #endif
 
 const uint8_t AHBPrescTable[16U] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
-const uint8_t APBPrescTable[8U] =  {0, 0, 0, 0, 1, 2, 3, 4};
+	0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9
+};
+const uint8_t APBPrescTable[8U] =  { 0, 0, 0, 0, 1, 2, 3, 4 };
 
 /*
  * @}
@@ -145,11 +146,11 @@ const uint8_t APBPrescTable[8U] =  {0, 0, 0, 0, 1, 2, 3, 4};
 	defined(STM32F103xE) || defined(STM32F103xG)
 #ifdef DATA_IN_ExtSRAM
 static void SystemInit_ExtMemCtl(void);
-#endif /* DATA_IN_ExtSRAM */
-#endif /*
-	* STM32F100xE || STM32F101xE || STM32F101xG ||
-	* STM32F103xE || STM32F103xG
-	*/
+#endif  /* DATA_IN_ExtSRAM */
+#endif  /*
+         * STM32F100xE || STM32F101xE || STM32F101xG ||
+         * STM32F103xE || STM32F103xG
+         */
 
 /*
  * @}
@@ -214,8 +215,8 @@ void SystemInit(void)
 	#endif /* STM32F105xC */
 
 	#if defined(STM32F100xE) || defined(STM32F101xE) || \
-		defined(STM32F101xG) || defined(STM32F103xE) || \
-		defined(STM32F103xG)
+	defined(STM32F101xG) || defined(STM32F103xE) || \
+	defined(STM32F103xG)
 	#ifdef DATA_IN_ExtSRAM
 	SystemInit_ExtMemCtl();
 	#endif /* DATA_IN_ExtSRAM */
@@ -302,71 +303,70 @@ void SystemCoreClockUpdate(void)
 		#if !defined(STM32F105xC) && !defined(STM32F107xC)
 		pllmull = (pllmull >> 18U) + 2U;
 
-		if (pllsource == 0x00U) {
-		/*
-		 *HSI oscillator clock divided by 2 selected as PLL clock entry
-		 */
+		if (pllsource == 0x00U)
+			/*
+			 * HSI oscillator clock divided by 2 selected as PLL clock entry
+			 */
 			SystemCoreClock = (HSI_VALUE >> 1U) * pllmull;
-		} else {
+		else {
 			#if defined(STM32F100xB) || defined(STM32F100xE)
 			prediv1factor = (RCC->CFGR2 & RCC_CFGR2_PREDIV1) + 1U;
-		/* HSE oscillator clock selected as PREDIV1 clock entry */
+			/* HSE oscillator clock selected as PREDIV1 clock entry */
 			SystemCoreClock = (HSE_VALUE / prediv1factor) * pllmull;
 			#else
 			/* HSE selected as PLL clock entry */
-			if ((RCC->CFGR & RCC_CFGR_PLLXTPRE) != (uint32_t)RESET) {
+			if ((RCC->CFGR & RCC_CFGR_PLLXTPRE) != (uint32_t)RESET)
 				/* HSE oscillator clock divided by 2 */
 				SystemCoreClock = (HSE_VALUE >> 1U) * pllmull;
-			} else {
+			else
 				SystemCoreClock = HSE_VALUE * pllmull;
-			}
+
 			#endif /*defined(STM32F100xB) || defined(STM32F100xE)*/
 		}
 		#else /* !defined(STM32F105xC) && !defined(STM32F107xC) */
 		pllmull = pllmull >> 18U;
 
-		if (pllmull != 0x0DU) {
+		if (pllmull != 0x0DU)
 			pllmull += 2U;
-		} else {
+		else
 			/* PLL multiplication factor = PLL input clock * 6.5 */
 			pllmull = 13U / 2U;
-		}
 
-		if (pllsource == 0x00U) {
-		/*
-		 * HSI oscillator clock divided by 2 selected as PLL clock
-		 * entry
-		 */
+		if (pllsource == 0x00U)
+			/*
+			 * HSI oscillator clock divided by 2 selected as PLL clock
+			 * entry
+			 */
 			SystemCoreClock = (HSI_VALUE >> 1U) * pllmull;
-		} else {
+		else {
 			/* PREDIV1 selected as PLL clock entry */
 
 			/* Get PREDIV1 clock source and division factor */
 			prediv1source = RCC->CFGR2 & RCC_CFGR2_PREDIV1SRC;
 			prediv1factor = (RCC->CFGR2 & RCC_CFGR2_PREDIV1) + 1U;
 
-			if (prediv1source == 0U) {
+			if (prediv1source == 0U)
 				/*
 				 * HSE oscillator clock selected as PREDIV1
 				 * clock entry
 				 */
 				SystemCoreClock = (HSE_VALUE / prediv1factor) * pllmull;
-			} else {
-			/* PLL2 clock selected as PREDIV1 clock entry */
+			else {
+				/* PLL2 clock selected as PREDIV1 clock entry */
 
-			/*
-			 * Get PREDIV2 division factor and PLL2 multiplication
-			 * factor
-			 */
+				/*
+				 * Get PREDIV2 division factor and PLL2 multiplication
+				 * factor
+				 */
 				prediv2factor = ((RCC->CFGR2 & RCC_CFGR2_PREDIV2)
-					>> 4U) + 1U;
+						 >> 4U) + 1U;
 				pll2mull = ((RCC->CFGR2 & RCC_CFGR2_PLL2MUL) >> 8U)
-					+ 2U;
+					   + 2U;
 				SystemCoreClock = (((HSE_VALUE / prediv2factor) *
-					pll2mull) / prediv1factor) * pllmull;
+						    pll2mull) / prediv1factor) * pllmull;
 			}
 		}
-	#endif /* STM32F105xC */
+	#endif  /* STM32F105xC */
 		break;
 	default:
 		SystemCoreClock = HSI_VALUE;
@@ -402,8 +402,9 @@ void SystemCoreClockUpdate(void)
 void SystemInit_ExtMemCtl(void)
 {
 	__IO uint32_t tmpreg;
+
 /*
- *FSMC Bank1 NOR/SRAM3 is used for the STM3210E-EVAL, if another Bank is
+ * FSMC Bank1 NOR/SRAM3 is used for the STM3210E-EVAL, if another Bank is
  * required, then adjust the Register Addresses
  */
 
