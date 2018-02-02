@@ -55,8 +55,7 @@ drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c \
 drivers/STemWin/Config/GUIConf.c \
 drivers/STemWin/Config/LCDConf.c \
 drivers/STemWin/Config/ILI9328.c \
-drivers/STemWin/Config/GUI_X.c \
-images/labworks.c
+drivers/STemWin/Config/GUI_X.c 
 
 # ASM sources
 ASM_SOURCES =  \
