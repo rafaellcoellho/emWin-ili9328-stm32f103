@@ -22,14 +22,12 @@ First you need to clone this repository on your machine.
 $ git clone https://github.com/rafaellcoellho/emWin-ili9328-stm32f103.git
 ```
 
-To analyze the code according to the linux kernel code style, the perl
-checkpatch script is used. In the scripts folder use dowload.sh to download
-directly from /torvalds/linux/scripts. Thanks to riboseinc who write the
-[script](https://github.com/riboseinc/checkpatch).
+To fit the kernel linux coding style, the
+[Uncrustify](https://github.com/uncrustify/uncrustify) program is used. To
+install in distro based on Debian:
 
 ```
-$ cd scripts/
-$ ./download.sh
+$ sudo apt-get install uncrustify
 ```
 
 The static analysis of the code is done through cppcheck. It is open source and
