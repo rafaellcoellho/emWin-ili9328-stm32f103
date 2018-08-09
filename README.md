@@ -76,6 +76,16 @@ $ sudo apt-get install libusb-1.0 libusb-1.0.0-dev python-usb
 
 ## Usage
 
+Just download the lib from this [link](https://www.st.com/en/embedded-software/stm32cubef1.html), go in ~/STM32Cube_FW_F1_V1.6.0/Middlewares/ST/STemWin/Lib/ copy "STemWin532_CM3_GCC.a" to the ~/emWin-ili9328-stm32f103/libs/STemWin/ folder.
+
+To create the .bin, .elf and .hex:
+
+```
+$ make runnable
+```
+
+## How port emWin to another display
+
 This repository is only a reference for projects with graphical interface using
 emWin. The important part is the way of writing the functions to fit any
 display to the library. The ILI9328.c and ILI9328.h files are the
@@ -124,7 +134,7 @@ void LCD_X_Config(void) {
 }
 ```
 
-You must also include the makefile in the STMWINLIB variable.
+The version of the library you using must be in STMWINLIB variable:
 
 ```shell
 STEMWINLIBPATH= drivers/STemWin
